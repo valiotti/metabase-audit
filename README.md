@@ -131,7 +131,7 @@ Four factors, 100 points total, the same formula MetaLens uses in its hosted ver
 | Documentation & organization | 20 | Questions without descriptions, questions outside collections, unused tables |
 | Dashboard reliability | 20 | Dashboards with broken questions or mostly stale content |
 
-A, 90 and up. B, 80. C, 70. D, 60. F, below. An instance with dashboards but zero saved questions is scored on reusability instead, because everything there lives ad hoc inside dashboards.
+Grades are calibrated on real instances, where 30 to 50 is typical for a company that has used Metabase for a few years: A from 85, B+ from 70, B from 55, C+ from 40, C from 30, D from 20, F below that. An instance with dashboards but zero saved questions is scored on reusability instead, because everything there lives ad hoc inside dashboards.
 
 ## Limits
 
