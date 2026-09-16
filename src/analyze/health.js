@@ -12,9 +12,9 @@
  *    weight whatever its timestamps say;
  *  - the empty instance gets one explicit factor instead of an empty factor
  *    list, so a report never has to render a bare 100 with nothing under it;
- *  - grades use the plain academic scale (A >= 90 down to F) instead of the
- *    SaaS curve that started A at 85 and used B+/C+ steps. The CLI reports a
- *    raw number next to it, so a curve that flatters the instance would mislead.
+ *  - grades keep the SaaS curve (A from 85, B+ 70, B 55, C+ 40, C 30, D 20),
+ *    so a score here reads the same as in the hosted X-Ray. The raw number is
+ *    always shown next to the letter.
  */
 
 import { STALE_DAYS } from "./constants.js";
