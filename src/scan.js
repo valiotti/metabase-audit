@@ -47,7 +47,9 @@ export async function runScan({
   let snapshotPath;
   if (snapshotFile) {
     snapshot = await loadSnapshotFile(snapshotFile);
-    snapshotPath = snapshotFile;
+    // Keep a copy in dir so "report" and "context" work later without --snapshot.
+    const canonical = path.join(dir, SNAPSHOT_FILENAME);
+    snapshotPath = path.resolve(snapshotFile) === path.resolve(canonical) ? canonical : await saveSnapshot(snapshot, dir);
   } else {
     if (!client) throw new Error("runScan: a client is required when no snapshot file is given");
     snapshot = await buildSnapshot(client, { url, compile, onProgress, now });

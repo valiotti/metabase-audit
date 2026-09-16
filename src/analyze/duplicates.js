@@ -66,7 +66,7 @@ function buildGroup(kind, similarity, cards, ctx) {
 
   let recommendation;
   if (kind === "exact-sql") {
-    recommendation = `These ${count} queries are structurally identical. Keep "${keep.name}" and archive the other ${archive.length}.`;
+    recommendation = `These ${count} queries are structurally identical. Keep ${keep.name}, archive the other ${archive.length}.`;
   } else {
     const tables = sourceTableNames(cards, ctx);
     recommendation = tables.length > 1

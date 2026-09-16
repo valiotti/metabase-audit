@@ -111,7 +111,7 @@ Tools exposed: `metabase_doctor`, `metabase_scan`, `metabase_findings`, `metabas
 | `scan [--compile]` | Fetches metadata, analyses it, writes the report and the context file |
 | `report` | Re-renders `METALENS-REPORT.md` from the existing snapshot, no network |
 | `context` | Re-renders `DATA-CONTEXT.md` from the existing snapshot |
-| `findings <summary\|duplicates\|broken\|stale\|dashboards\|actions\|tables> [--limit N]` | Prints a slice of the findings as JSON |
+| `findings <summary\|duplicates\|broken\|stale\|dashboards\|actions\|tables\|anomalies\|creators> [--limit N]` | Prints a slice of the findings as JSON |
 | `archive --ids a,b \| --from duplicates\|broken [--apply] [--reason "..."]` | Dry run by default |
 | `unarchive --undo <file> [--apply]` | Restores from an undo file |
 | `mcp` | Starts the MCP server on stdio |

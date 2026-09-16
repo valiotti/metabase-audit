@@ -91,7 +91,7 @@ export function scoreHealth(snapshot, ctx) {
         maxScore: 40,
         description: `${brokenDashboards} of ${dashboards.length} dashboards have broken cards`,
         howToImprove: dashDeduct > 10
-          ? "Fix or remove broken cards from active dashboards, these are what stakeholders see."
+          ? "Fix or remove broken cards from active dashboards. That is what stakeholders see."
           : "Dashboards are in good shape.",
       },
     ]);
@@ -155,7 +155,7 @@ export function scoreHealth(snapshot, ctx) {
         ? `${brokenDashboards} of ${dashboards.length} dashboards have broken cards`
         : "No dashboards analyzed",
       howToImprove: dashDeduct > 5
-        ? "Fix or remove broken cards from active dashboards, these are what stakeholders see."
+        ? "Fix or remove broken cards from active dashboards. That is what stakeholders see."
         : "Dashboards are in good shape.",
     },
   ]);
