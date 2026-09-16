@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-16T00:00:00.000Z",
+  "instance": { "url": "https://metabase.acme.test", "siteName": "Acme", "version": "v0.62.3" },
+  "databases": [
+    { "id": 1, "name": "Sample Database", "engine": "h2", "isSample": true },
+    { "id": 2, "name": "Warehouse", "engine": "postgres", "isSample": false }
+  ],
+  "tables": [
+    {
+      "id": 10, "dbId": 2, "schema": "public", "name": "orders", "displayName": "Orders",
+      "description": "One row per order", "rowCount": 120000,
+      "fields": [
+        { "id": 100, "name": "id", "baseType": "type/Integer", "semanticType": "type/PK", "fkTargetFieldId": null },
+        { "id": 101, "name": "user_id", "baseType": "type/Integer", "semanticType": "type/FK", "fkTargetFieldId": 110 },
+        { "id": 102, "name": "amount", "baseType": "type/Decimal", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 103, "name": "status", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null },
+        { "id": 104, "name": "created_at", "baseType": "type/DateTime", "semanticType": "type/CreationTimestamp", "fkTargetFieldId": null },
+        { "id": 105, "name": "updated_at", "baseType": "type/DateTime", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 106, "name": "currency", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null },
+        { "id": 107, "name": "discount", "baseType": "type/Decimal", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 108, "name": "tax", "baseType": "type/Decimal", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 109, "name": "shipping", "baseType": "type/Decimal", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 111, "name": "channel", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null },
+        { "id": 112, "name": "coupon_code", "baseType": "type/Text", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 113, "name": "notes", "baseType": "type/Text", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 114, "name": "refunded_at", "baseType": "type/DateTime", "semanticType": null, "fkTargetFieldId": null }
+      ]
+    },
+    {
+      "id": 11, "dbId": 2, "schema": "public", "name": "users", "displayName": "Users",
+      "description": null, "rowCount": 15000,
+      "fields": [
+        { "id": 110, "name": "id", "baseType": "type/Integer", "semanticType": "type/PK", "fkTargetFieldId": null },
+        { "id": 115, "name": "email", "baseType": "type/Text", "semanticType": "type/Email", "fkTargetFieldId": null },
+        { "id": 116, "name": "name", "baseType": "type/Text", "semanticType": "type/Name", "fkTargetFieldId": null },
+        { "id": 117, "name": "created_at", "baseType": "type/DateTime", "semanticType": "type/CreationTimestamp", "fkTargetFieldId": null },
+        { "id": 118, "name": "plan", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null },
+        { "id": 119, "name": "country", "baseType": "type/Text", "semanticType": "type/Country", "fkTargetFieldId": null }
+      ]
+    },
+    {
+      "id": 12, "dbId": 2, "schema": "public", "name": "payments", "displayName": "Payments",
+      "description": null, "rowCount": 98000,
+      "fields": [
+        { "id": 120, "name": "id", "baseType": "type/Integer", "semanticType": "type/PK", "fkTargetFieldId": null },
+        { "id": 121, "name": "order_id", "baseType": "type/Integer", "semanticType": "type/FK", "fkTargetFieldId": 100 },
+        { "id": 122, "name": "amount", "baseType": "type/Decimal", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 123, "name": "paid_at", "baseType": "type/DateTime", "semanticType": null, "fkTargetFieldId": null },
+        { "id": 124, "name": "method", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null }
+      ]
+    },
+    {
+      "id": 13, "dbId": 2, "schema": "public", "name": "events", "displayName": "Events",
+      "description": null, "rowCount": 5000000,
+      "fields": [
+        { "id": 130, "name": "id", "baseType": "type/BigInteger", "semanticType": "type/PK", "fkTargetFieldId": null },
+        { "id": 131, "name": "user_id", "baseType": "type/Integer", "semanticType": "type/FK", "fkTargetFieldId": 110 },
+        { "id": 132, "name": "name", "baseType": "type/Text", "semanticType": "type/Category", "fkTargetFieldId": null },
+        { "id": 133, "name": "ts", "baseType": "type/DateTime", "semanticType": null, "fkTargetFieldId": null }
+      ]
+    },
+    {
+      "id": 90, "dbId": 1, "schema": "PUBLIC", "name": "PRODUCTS", "displayName": "Products",
+      "description": null, "rowCount": 200,
+      "fields": [
+        { "id": 900, "name": "ID", "baseType": "type/BigInteger", "semanticType": "type/PK", "fkTargetFieldId": null }
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "id": 1, "name": "Revenue by month", "description": "Monthly gross revenue from orders", "type": "question",
+      "queryType": "native", "display": "line", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT date_trunc('month', created_at) AS m, sum(amount) AS revenue\nFROM orders\nWHERE created_at >= '2025-01-01'\nGROUP BY 1\nORDER BY 1",
+      "sqlSource": "native", "collectionId": 5, "creatorId": 3,
+      "createdAt": "2025-01-10T09:00:00.000Z", "updatedAt": "2026-06-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-11T08:00:00.000Z", "viewCount": 40, "archived": false, "hasError": false
+    },
+    {
+      "id": 2, "name": "Revenue by month (copy)", "description": null, "type": "question",
+      "queryType": "native", "display": "line", "databaseId": 2, "sourceTableId": null,
+      "sql": "-- copied from Jane\nselect   date_trunc('month', created_at) as m,\n  sum(amount) as revenue\nfrom orders\nwhere created_at >= '2025-01-01'\ngroup by 1\norder by 1",
+      "sqlSource": "native", "collectionId": 6, "creatorId": 4,
+      "createdAt": "2025-03-10T09:00:00.000Z", "updatedAt": "2025-03-10T09:00:00.000Z",
+      "lastUsedAt": "2026-02-28T08:00:00.000Z", "viewCount": 3, "archived": false, "hasError": false
+    },
+    {
+      "id": 3, "name": "revenue_by_month_v2", "description": null, "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT date_trunc('month', created_at) AS m, sum(amount) AS revenue\nFROM orders\nWHERE created_at >= '2024-01-01'\nGROUP BY 1\nORDER BY 1",
+      "sqlSource": "native", "collectionId": 5, "creatorId": 3,
+      "createdAt": "2025-05-10T09:00:00.000Z", "updatedAt": "2025-05-10T09:00:00.000Z",
+      "lastUsedAt": null, "viewCount": 1, "archived": false, "hasError": false
+    },
+    {
+      "id": 4, "name": "Active users", "description": "Users with at least one order in the last 30 days", "type": "question",
+      "queryType": "query", "display": "scalar", "databaseId": 2, "sourceTableId": 11,
+      "sql": null, "sqlSource": null, "collectionId": 5, "creatorId": 3,
+      "createdAt": "2025-02-01T09:00:00.000Z", "updatedAt": "2026-01-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-06T08:00:00.000Z", "viewCount": 25, "archived": false, "hasError": false
+    },
+    {
+      "id": 5, "name": "Active Users", "description": null, "type": "question",
+      "queryType": "query", "display": "scalar", "databaseId": 2, "sourceTableId": 11,
+      "sql": null, "sqlSource": null, "collectionId": 5, "creatorId": 4,
+      "createdAt": "2025-08-01T09:00:00.000Z", "updatedAt": "2025-08-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-01T08:00:00.000Z", "viewCount": 4, "archived": false, "hasError": false
+    },
+    {
+      "id": 6, "name": "Old orders report", "description": "Orders from the legacy system", "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT lo.id, u.email FROM legacy_orders lo JOIN users u ON u.id = lo.user_id",
+      "sqlSource": "native", "collectionId": 6, "creatorId": 4,
+      "createdAt": "2024-11-01T09:00:00.000Z", "updatedAt": "2024-11-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-10T08:00:00.000Z", "viewCount": 7, "archived": false, "hasError": false
+    },
+    {
+      "id": 7, "name": "Churn cohort", "description": "Cohort view of churned users", "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 2, "sourceTableId": null,
+      "sql": "WITH c AS (SELECT * FROM users)\nSELECT EXTRACT(epoch FROM o.created_at) AS t, c.id\nFROM orders o\nJOIN users u ON u.id = o.user_id\nJOIN c ON c.id = u.id",
+      "sqlSource": "native", "collectionId": 5, "creatorId": 3,
+      "createdAt": "2025-04-01T09:00:00.000Z", "updatedAt": "2025-04-01T09:00:00.000Z",
+      "lastUsedAt": "2026-06-08T08:00:00.000Z", "viewCount": 9, "archived": false, "hasError": false
+    },
+    {
+      "id": 8, "name": "Payments by day", "description": null, "type": "question",
+      "queryType": "native", "display": "bar", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT p.paid_at::date AS d, sum(p.amount) FROM payments p JOIN orders o ON o.id = p.order_id GROUP BY 1",
+      "sqlSource": "native", "collectionId": 5, "creatorId": 4,
+      "createdAt": "2024-06-01T09:00:00.000Z", "updatedAt": "2024-06-01T09:00:00.000Z",
+      "lastUsedAt": "2025-08-12T08:00:00.000Z", "viewCount": 2, "archived": false, "hasError": false
+    },
+    {
+      "id": 9, "name": "Archived thing", "description": null, "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT 1", "sqlSource": "native", "collectionId": 6, "creatorId": 4,
+      "createdAt": "2024-01-01T09:00:00.000Z", "updatedAt": "2024-01-01T09:00:00.000Z",
+      "lastUsedAt": "2025-01-01T08:00:00.000Z", "viewCount": 0, "archived": true, "hasError": false
+    },
+    {
+      "id": 10, "name": "Sample card", "description": null, "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 1, "sourceTableId": null,
+      "sql": "SELECT * FROM PRODUCTS", "sqlSource": "native", "collectionId": null, "creatorId": 3,
+      "createdAt": "2024-01-01T09:00:00.000Z", "updatedAt": "2024-01-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-15T08:00:00.000Z", "viewCount": 100, "archived": false, "hasError": false
+    },
+    {
+      "id": 11, "name": "No collection card", "description": null, "type": "question",
+      "queryType": "native", "display": "scalar", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT count(*) FROM users", "sqlSource": "native", "collectionId": null, "creatorId": 4,
+      "createdAt": "2026-08-01T09:00:00.000Z", "updatedAt": "2026-08-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-14T08:00:00.000Z", "viewCount": 6, "archived": false, "hasError": false
+    },
+    {
+      "id": 12, "name": "Sample User card", "description": null, "type": "question",
+      "queryType": "native", "display": "table", "databaseId": 2, "sourceTableId": null,
+      "sql": "SELECT * FROM orders", "sqlSource": "native", "collectionId": null, "creatorId": 13371338,
+      "createdAt": "2024-01-01T09:00:00.000Z", "updatedAt": "2024-01-01T09:00:00.000Z",
+      "lastUsedAt": "2026-09-15T08:00:00.000Z", "viewCount": 50, "archived": false, "hasError": false
+    }
+  ],
+  "dashboards": [
+    {
+      "id": 20, "name": "Exec", "description": "Weekly exec view", "collectionId": 5, "creatorId": 3,
+      "createdAt": "2025-01-15T09:00:00.000Z", "updatedAt": "2026-06-01T09:00:00.000Z",
+      "lastViewedAt": "2026-09-14T08:00:00.000Z", "viewCount": 50, "archived": false, "cardIds": [1, 4]
+    },
+    {
+      "id": 21, "name": "Ops", "description": null, "collectionId": 5, "creatorId": 4,
+      "createdAt": "2025-03-15T09:00:00.000Z", "updatedAt": "2025-03-15T09:00:00.000Z",
+      "lastViewedAt": "2026-03-01T08:00:00.000Z", "viewCount": 12, "archived": false, "cardIds": [7, 8, 2]
+    },
+    {
+      "id": 22, "name": "Legacy", "description": null, "collectionId": 6, "creatorId": 4,
+      "createdAt": "2024-11-15T09:00:00.000Z", "updatedAt": "2024-11-15T09:00:00.000Z",
+      "lastViewedAt": "2026-09-10T08:00:00.000Z", "viewCount": 8, "archived": false, "cardIds": [6]
+    },
+    {
+      "id": 23, "name": "E-commerce Insights", "description": "Metabase demo", "collectionId": null, "creatorId": 13371338,
+      "createdAt": "2024-01-01T09:00:00.000Z", "updatedAt": "2024-01-01T09:00:00.000Z",
+      "lastViewedAt": null, "viewCount": 0, "archived": false, "cardIds": [10, 12]
+    }
+  ],
+  "collections": [
+    { "id": 5, "name": "Finance", "parentId": null, "path": "Finance", "archived": false },
+    { "id": 6, "name": "Archive", "parentId": 5, "path": "Finance / Archive", "archived": false }
+  ],
+  "users": [
+    { "id": 3, "name": "Jane Doe", "email": "jane@acme.test", "isActive": true },
+    { "id": 4, "name": "Bob Ray", "email": "bob@acme.test", "isActive": true },
+    { "id": 13371338, "name": "Sample User", "email": "sample@metabase.test", "isActive": false }
+  ],
+  "meta": {
+    "dashboardDetailsFetched": 4, "dashboardDetailsCap": 300, "usersFetched": true,
+    "compiledCards": 0, "activityBackfill": false, "warnings": []
+  }
+}
