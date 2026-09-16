@@ -93,7 +93,12 @@ export async function runDoctor(client, { url, compile = false } = {}) {
     }
     return { ok: false, steps, instance, size, estimate };
   }
-  const realDbs = databases.filter((d) => !(d.is_sample === true));
+  const sampleDbIds = new Set(
+    databases
+      .filter((d) => d.is_sample === true || (String(d.engine ?? "").toLowerCase() === "h2" && /sample|example/i.test(String(d.name ?? ""))))
+      .map((d) => d.id)
+  );
+  const realDbs = databases.filter((d) => !sampleDbIds.has(d.id));
   if (databases.length === 0) {
     steps.push(
       step(
@@ -132,18 +137,20 @@ export async function runDoctor(client, { url, compile = false } = {}) {
   // Step 5: size, so the user knows what to expect before scan.
   try {
     const [cards, dashboards] = await Promise.all([client.getAllCards(), client.getAllDashboards()]);
-    const activeCards = cards.filter((c) => !c.archived);
+    const realCards = cards.filter((c) => !sampleDbIds.has(c.database_id));
+    const sampleCount = cards.length - realCards.length;
+    const activeCards = realCards.filter((c) => !c.archived);
     const guiCards = activeCards.filter((c) => c.query_type === "query" || (c.dataset_query && c.dataset_query.type === "query")).length;
     const detailFetches = Math.min(dashboards.filter((d) => !d.archived).length, DASHBOARD_DETAILS_CAP);
     const requests = 3 + realDbs.length + detailFetches + (compile ? guiCards : 0);
-    size = { cards: cards.length, activeCards: activeCards.length, guiCards, dashboards: dashboards.length, databases: databases.length, requests };
-    const slow = cards.length > 2000 || detailFetches > 150 || (compile && guiCards > 300);
+    size = { cards: realCards.length, sampleCards: sampleCount, activeCards: activeCards.length, guiCards, dashboards: dashboards.length, databases: databases.length, requests };
+    const slow = realCards.length > 2000 || detailFetches > 150 || (compile && guiCards > 300);
     estimate = slow ? "a few minutes, mostly waiting on Metabase" : "under a minute";
     steps.push(
       step(
         "size",
         "ok",
-        `${cards.length} question${cards.length === 1 ? "" : "s"}, ${dashboards.length} dashboard${dashboards.length === 1 ? "" : "s"}`,
+        `${realCards.length} question${realCards.length === 1 ? "" : "s"}, ${dashboards.length} dashboard${dashboards.length === 1 ? "" : "s"}${sampleCount > 0 ? ` (${sampleCount} on the Sample Database are skipped)` : ""}`,
         `Scan will make about ${requests} requests; expect ${estimate}.${guiCards > 0 && !compile ? ` ${guiCards} questions are GUI-built; add --compile to check them by SQL.` : ""}`
       )
     );

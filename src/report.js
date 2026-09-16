@@ -37,6 +37,9 @@ function plural(count, one, many) {
 /** Table-cell safe text: single line, pipes escaped, never "undefined". */
 function cell(value) {
   return String(value ?? "")
+    // Question names are user data; dashes in them become hyphens so the
+    // report never carries an em or en dash.
+    .replace(/[\u2010-\u2015\u2212]/g, "-")
     .replace(/\s*\r?\n\s*/g, " ")
     .replace(/\|/g, "\\|")
     .trim();
@@ -176,14 +179,20 @@ function duplicatesSection(findings) {
 
   const blocks = [heading];
   for (const group of groups) {
-    const verb = group.kind === "exact-sql" ? "Archive" : "Review";
     const keep = group.keep ?? {};
-    const lines = [
-      `**Keep ${link(entityLabel(keep.name, keep.id), keep.url)} (${usageNote(keep)})**`,
-      ...asArray(group.archive).map(
-        (card) => `- ${verb} ${link(entityLabel(card.name, card.id), card.url)} (${usageNote(card)})`,
-      ),
-    ];
+    const others = asArray(group.archive);
+    const lines = group.kind === "exact-sql"
+      ? [
+          `**Keep ${link(entityLabel(keep.name, keep.id), keep.url)} (${usageNote(keep)})**`,
+          ...others.map((card) => `- Archive ${link(entityLabel(card.name, card.id), card.url)} (${usageNote(card)})`),
+        ]
+      : [
+          // Same name, different queries: nothing is archived automatically, the
+          // most used one is only a hint about which version the team trusts.
+          `**Same name: ${cell(entityLabel(keep.name, keep.id))} (${plural(others.length + 1, "question")})**`,
+          `- Most used: ${link(entityLabel(keep.name, keep.id), keep.url)} (${usageNote(keep)})`,
+          ...others.map((card) => `- Review ${link(entityLabel(card.name, card.id), card.url)} (${usageNote(card)})`),
+        ];
     blocks.push(lines.join("\n"));
     if (group.recommendation) blocks.push(cell(group.recommendation));
     if (group.kind === "exact-sql") {

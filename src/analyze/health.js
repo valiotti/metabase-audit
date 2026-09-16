@@ -90,7 +90,7 @@ export function scoreHealth(snapshot, ctx) {
         score: 40 - dashDeduct,
         maxScore: 40,
         description: `${brokenDashboards} of ${dashboards.length} dashboards have broken cards`,
-        howToImprove: dashDeduct > 10
+        howToImprove: brokenDashboards > 0
           ? "Fix or remove broken cards from active dashboards. That is what stakeholders see."
           : "Dashboards are in good shape.",
       },
@@ -152,11 +152,13 @@ export function scoreHealth(snapshot, ctx) {
       score: 20 - dashDeduct,
       maxScore: 20,
       description: dashboards.length > 0
-        ? `${brokenDashboards} of ${dashboards.length} dashboards have broken cards`
+        ? `${brokenDashboards} of ${dashboards.length} dashboards have broken cards, ${warningDashboards} are mostly stale`
         : "No dashboards analyzed",
-      howToImprove: dashDeduct > 5
+      howToImprove: brokenDashboards > 0
         ? "Fix or remove broken cards from active dashboards. That is what stakeholders see."
-        : "Dashboards are in good shape.",
+        : warningDashboards > 0
+          ? "Refresh or archive the dashboards nobody opens. Stale dashboards erode trust in the rest."
+          : "Dashboards are in good shape.",
     },
   ]);
 }
