@@ -89,6 +89,7 @@ export class MetabaseClient {
     // Kept as a ready-made header so the credentials are encoded once and are
     // never part of the URL, which is what gets printed and written to disk.
     this.basicAuthHeader = basicAuthHeader(basicAuth);
+    this.basicPassword = basicAuth && basicAuth.password ? String(basicAuth.password) : "";
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
     this.retries = Math.max(1, retries);
@@ -124,7 +125,7 @@ export class MetabaseClient {
   redactSecrets(text) {
     let out = String(text ?? "");
     if (this.apiKey) out = out.split(this.apiKey).join("****");
-    if (this.basicAuth && this.basicAuth.password) out = out.split(this.basicAuth.password).join("****");
+    if (this.basicPassword) out = out.split(this.basicPassword).join("****");
     return out;
   }
 
