@@ -220,6 +220,24 @@ export class MetabaseClient {
   }
 
   /**
+   * GET /api/user/:id — null on 402/403/404 instead of throwing.
+   *
+   * The list endpoint hides the synthetic users Metabase creates behind API
+   * keys, yet questions made with an API key carry that user's id as
+   * `creator_id`, so the snapshot resolves those ids one by one.
+   */
+  async getUser(id) {
+    try {
+      return await this.request("GET", `/api/user/${id}`);
+    } catch (error) {
+      if (error instanceof MetabaseHttpError && [402, 403, 404].includes(error.status)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * GET /api/dashboard, falling back to GET /api/search?models=dashboard when the primary
    * endpoint 404s or returns an empty list (older Metabase only lists the root collection there).
    * Search rows are mapped onto the same shape the primary endpoint would have produced.

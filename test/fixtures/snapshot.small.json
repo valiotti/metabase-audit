@@ -193,6 +193,6 @@
   ],
   "meta": {
     "dashboardDetailsFetched": 4, "dashboardDetailsCap": 300, "usersFetched": true,
-    "compiledCards": 0, "activityBackfill": false, "warnings": []
+    "extraUsersFetched": 0, "compiledCards": 0, "activityBackfill": false, "warnings": []
   }
 }

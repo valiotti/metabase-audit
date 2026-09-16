@@ -225,6 +225,9 @@ function makeClient(overrides = {}) {
     async getAllUsers() {
       return structuredClone(USERS);
     },
+    async getUser() {
+      return null;
+    },
     async getAllDashboards() {
       return structuredClone(DASHBOARDS);
     },
@@ -405,6 +408,7 @@ test("buildSnapshot produces the documented shape with no undefined values", asy
     dashboardDetailsFetched: 2,
     dashboardDetailsCap: 300,
     usersFetched: true,
+    extraUsersFetched: 0,
     compiledCards: 0,
     activityBackfill: false,
     warnings: [],
@@ -535,6 +539,123 @@ test("buildSnapshot survives a 403 from the user list", async () => {
   assert.equal(snapshot.meta.usersFetched, false);
   assert.equal(snapshot.meta.warnings.length, 1);
   assert.match(snapshot.meta.warnings[0], /users/i);
+});
+
+test("buildSnapshot resolves creator ids the user list does not return", async () => {
+  const asked = [];
+  const snapshot = await build({
+    async getAllUsers() {
+      return [{ id: 3, common_name: "Jane Admin", email: "admin@acme.test", is_active: true }];
+    },
+    async getAllCards() {
+      const cards = structuredClone(CARDS);
+      cards[0].creator_id = 33; // saved through an API key
+      cards[1].creator_id = 68;
+      return cards;
+    },
+    async getAllDashboards() {
+      return [
+        { id: 20, name: "Exec", creator_id: 3, archived: false, view_count: 5 },
+        { id: 21, name: "Ops", creator_id: 33, archived: false, view_count: 1 },
+        { id: 23, name: "E-commerce Insights", creator_id: SAMPLE_USER_ID, archived: false, view_count: 0 },
+      ];
+    },
+    async getDashboard(id) {
+      return { id, dashcards: [] };
+    },
+    async getUser(id) {
+      asked.push(id);
+      if (id === 33) {
+        return {
+          id: 33,
+          email: "api-key-user-80b0@api-key.invalid",
+          first_name: null,
+          last_name: "",
+          common_name: "",
+          is_active: true,
+          is_superuser: true,
+        };
+      }
+      if (id === 68) return { id: 68, common_name: "Jane Doe" };
+      return null;
+    },
+  });
+
+  assert.deepEqual(asked, [33, 68], "already known ids and the Sample User are never fetched");
+  assert.deepEqual(snapshot.users, [
+    { id: 3, name: "Jane Admin", email: "admin@acme.test", isActive: true },
+    { id: 33, name: "API key user 33", email: "api-key-user-80b0@api-key.invalid", isActive: true },
+    { id: 68, name: "Jane Doe", email: null, isActive: true },
+  ]);
+  assert.equal(snapshot.meta.extraUsersFetched, 2);
+  assert.equal(snapshot.meta.usersFetched, true);
+  assert.deepEqual(snapshot.meta.warnings, []);
+});
+
+test("buildSnapshot leaves unresolvable creator ids out of users", async () => {
+  const snapshot = await build({
+    async getAllUsers() {
+      return [{ id: 3, common_name: "Jane Admin", email: "admin@acme.test" }];
+    },
+    async getUser(id) {
+      if (id === 4) throw new Error("500 Internal Server Error");
+      return null;
+    },
+  });
+
+  assert.deepEqual(snapshot.users.map((u) => u.id), [3]);
+  assert.equal(snapshot.meta.extraUsersFetched, 0);
+  assert.equal(snapshot.meta.warnings.length, 1);
+  assert.match(snapshot.meta.warnings[0], /user 4/i);
+});
+
+test("buildSnapshot resolves at most 100 creator ids, most prolific first", async () => {
+  const asked = [];
+  const manyCards = [];
+  // 150 owners, each with one card, plus a single owner holding 5 cards.
+  for (let i = 0; i < 150; i++) {
+    manyCards.push({
+      id: 1000 + i,
+      name: `Card ${i}`,
+      database_id: 2,
+      query_type: "native",
+      dataset_query: { type: "native", database: 2, native: { query: "SELECT 1" } },
+      creator_id: 200 + i,
+      last_used_at: "2026-09-01T00:00:00Z",
+      view_count: 1,
+    });
+  }
+  for (let i = 0; i < 5; i++) {
+    manyCards.push({ ...manyCards[0], id: 2000 + i, creator_id: 999 });
+  }
+
+  const snapshot = await build({
+    async getAllUsers() {
+      return [];
+    },
+    async getAllCards() {
+      return manyCards;
+    },
+    async getUser(id) {
+      asked.push(id);
+      return { id, common_name: `User ${id}` };
+    },
+  });
+
+  assert.equal(asked.length, 100);
+  assert.ok(asked.includes(999), "the busiest owner is resolved first");
+  assert.equal(snapshot.meta.extraUsersFetched, 100);
+  assert.equal(snapshot.meta.warnings.length, 1);
+  assert.match(snapshot.meta.warnings[0], /100 most frequent/);
+});
+
+test("buildSnapshot works with a client that has no getUser", async () => {
+  const client = makeClient();
+  delete client.getUser;
+  const snapshot = await buildSnapshot(client, { url: "https://metabase.acme.test", now: NOW });
+
+  assert.equal(snapshot.meta.extraUsersFetched, 0);
+  assert.equal(snapshot.users.length, 4);
 });
 
 test("buildSnapshot falls back to getAllTables when database metadata fails", async () => {

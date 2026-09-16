@@ -99,7 +99,7 @@ Three ways, pick one.
 }
 ```
 
-Tools exposed: `metabase_doctor`, `metabase_scan`, `metabase_findings`, `metabase_context`, `metabase_archive_cards` (preview unless `apply: true`), `metabase_unarchive`.
+Tools exposed: `metabase_doctor`, `metabase_scan`, `metabase_findings`, `metabase_context`, `metabase_archive_cards` (preview unless `apply: true`), `metabase_unarchive`. Set `METALENS_SNAPSHOT` to a saved `snapshot.json` instead of the two credentials to let the model work on a snapshot with no network access at all.
 
 **Plain paste.** Open `DATA-CONTEXT.md`, paste it into any chat, ask your questions.
 

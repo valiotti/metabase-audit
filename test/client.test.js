@@ -140,6 +140,35 @@ test("getAllUsers returns [] on a 403 instead of throwing", async () => {
   assert.deepEqual(await client.getAllUsers(), []);
 });
 
+test("getUser fetches one user and returns null on a 404", async () => {
+  const apiKeyUser = {
+    id: 33,
+    email: "api-key-user-80b0@api-key.invalid",
+    first_name: null,
+    last_name: "",
+    common_name: "",
+    is_active: true,
+  };
+  const okFetch = fakeFetch([jsonResponse(200, apiKeyUser)]);
+  const okClient = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl: okFetch });
+
+  assert.deepEqual(await okClient.getUser(33), apiKeyUser);
+  assert.equal(okFetch.calls[0].url, "http://x.test/api/user/33");
+
+  const missingFetch = fakeFetch([jsonResponse(404, { error: "not found" })]);
+  const missingClient = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl: missingFetch, retryDelayMs: 1 });
+  assert.equal(await missingClient.getUser(33), null);
+
+  const forbiddenFetch = fakeFetch([jsonResponse(403, { error: "forbidden" })]);
+  const forbiddenClient = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl: forbiddenFetch, retryDelayMs: 1 });
+  assert.equal(await forbiddenClient.getUser(33), null);
+
+  // Anything else still surfaces as an error.
+  const brokenFetch = fakeFetch([jsonResponse(401, { error: "unauthorized" })]);
+  const brokenClient = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl: brokenFetch, retryDelayMs: 1 });
+  await assert.rejects(() => brokenClient.getUser(33), MetabaseHttpError);
+});
+
 test("request times out and rejects with a 'timed out' message", async () => {
   const fetchImpl = hangingFetch();
   const client = new MetabaseClient({

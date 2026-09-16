@@ -23,6 +23,8 @@ export const SNAPSHOT_FILENAME = "snapshot.json";
 const ACTIVITY_LIMIT = 2000;
 /** Backfill only kicks in when more than this share of cards lack a timestamp. */
 const ACTIVITY_NULL_RATIO = 0.5;
+/** At most this many creator ids are resolved one by one after the user list. */
+const EXTRA_USER_CAP = 100;
 
 function message(err) {
   return err instanceof Error ? err.message : String(err);
@@ -118,7 +120,20 @@ function userName(user) {
   if (common) return common;
   const full = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
   if (full) return full;
-  return strOrNull(user.email) ?? `User ${user.id}`;
+  // Users behind an API key have no name at all, only a synthetic address;
+  // printing that address as an owner name helps nobody.
+  const email = strOrNull(user.email);
+  if (email && /@api-key\.invalid$/i.test(email)) return `API key user ${user.id}`;
+  return email ?? `User ${user.id}`;
+}
+
+function mapUser(user) {
+  return {
+    id: numOrNull(user.id),
+    name: userName(user),
+    email: strOrNull(user.email),
+    isActive: user.is_active !== false,
+  };
 }
 
 /** `/1/5/` → `[1, 5]`. Anything non-numeric in the path is ignored. */
@@ -172,6 +187,7 @@ export async function buildSnapshot(client, options = {}) {
     dashboardDetailsFetched: 0,
     dashboardDetailsCap,
     usersFetched: false,
+    extraUsersFetched: 0,
     compiledCards: 0,
     activityBackfill: false,
     warnings,
@@ -298,12 +314,7 @@ export async function buildSnapshot(client, options = {}) {
   let users = [];
   try {
     const rawUsers = (await client.getAllUsers()) || [];
-    users = rawUsers.map((u) => ({
-      id: numOrNull(u.id),
-      name: userName(u),
-      email: strOrNull(u.email),
-      isActive: u.is_active !== false,
-    }));
+    users = rawUsers.map(mapUser);
     meta.usersFetched = users.length > 0;
   } catch (err) {
     warnings.push(`Could not fetch users: ${message(err)}`);
@@ -369,6 +380,54 @@ export async function buildSnapshot(client, options = {}) {
       cardIds,
     };
   });
+
+  // ─── creator ids missing from the user list ────────────────────────────
+  // `/api/user` omits the synthetic users Metabase creates behind API keys,
+  // yet questions saved through an API key carry that user's id as creator,
+  // so the report would name them "User 33". `/api/user/:id` still answers for
+  // those ids, so the stragglers are resolved one request at a time.
+  if (typeof client.getUser === "function") {
+    const known = new Set(users.map((u) => u.id));
+    const ownedCount = new Map();
+    for (const item of [...cards, ...dashboards]) {
+      const id = item.creatorId;
+      if (id === null || id === SAMPLE_USER_ID || known.has(id)) continue;
+      ownedCount.set(id, (ownedCount.get(id) || 0) + 1);
+    }
+
+    let missingIds = [...ownedCount.keys()];
+    if (missingIds.length > EXTRA_USER_CAP) {
+      missingIds = [...ownedCount.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, EXTRA_USER_CAP)
+        .map(([id]) => id);
+      warnings.push(
+        `${ownedCount.size} creator ids are missing from the user list; resolved only the ${EXTRA_USER_CAP} most frequent.`,
+      );
+    }
+
+    if (missingIds.length > 0) {
+      let usersDone = 0;
+      progress("users", 0, missingIds.length);
+      const resolved = await mapWithConcurrency(missingIds, concurrency, async (id) => {
+        let row = null;
+        try {
+          row = await client.getUser(id);
+        } catch (err) {
+          warnings.push(`Could not fetch user ${id}: ${message(err)}`);
+        }
+        progress("users", ++usersDone, missingIds.length);
+        return row;
+      });
+      for (const row of resolved) {
+        // Ids that resolve to nothing are simply left out; the report falls
+        // back to "User <id>" for them.
+        if (!row || numOrNull(row.id) === null) continue;
+        users.push(mapUser(row));
+        meta.extraUsersFetched++;
+      }
+    }
+  }
 
   // ─── activity backfill ─────────────────────────────────────────────────
   // Metabase v0.50.x and older do not return `last_used_at` on /api/card. When
