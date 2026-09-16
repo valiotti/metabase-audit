@@ -144,6 +144,75 @@ test("extractReferencedTables is safe on garbage input", () => {
   assert.deepEqual(extractReferencedTables({ sql: "x" }), []);
 });
 
+// Regressions from a scan of a real 2,700-question Metabase instance.
+
+test("extractReferencedTables ignores the FROM of IS DISTINCT FROM", () => {
+  assert.deepEqual(
+    extractReferencedTables("SELECT u.id FROM public.users u WHERE (u.tester IS DISTINCT FROM TRUE)"),
+    ["users"]
+  );
+  assert.deepEqual(
+    extractReferencedTables("SELECT 1 FROM credits d WHERE d.from_id IS NOT DISTINCT FROM a.issued_id"),
+    ["credits"]
+  );
+});
+
+test("extractReferencedTables reads hyphenated BigQuery project ids", () => {
+  assert.deepEqual(
+    extractReferencedTables(
+      "SELECT 1 FROM sniffspot-dwh.dbt_datawarehouse.int_subscriptions s JOIN sniffspot-dwh.dbt_datawarehouse.dim_users u ON 1=1"
+    ),
+    ["int_subscriptions", "dim_users"]
+  );
+  assert.deepEqual(extractReferencedTables("SELECT 1 FROM `sniffspot-dwh.dbt.int_x`"), ["int_x"]);
+  assert.deepEqual(extractReferencedTables("SELECT a - b AS d FROM totals"), ["totals"]);
+});
+
+test("extractReferencedTables skips a table function called with a space before its parens", () => {
+  assert.deepEqual(
+    extractReferencedTables(
+      "SELECT date_trunc('month', dd)::date FROM generate_series ( (SELECT min(x) FROM orders), now(), '1 month') dd"
+    ),
+    ["orders"]
+  );
+});
+
+test("extractReferencedTables ignores FROM inside quoted identifiers", () => {
+  assert.deepEqual(
+    extractReferencedTables(
+      'SELECT metric1 AS `New Paid Subs from Trials - Metric Catalog v2`, x AS "Value from guest" FROM t'
+    ),
+    ["t"]
+  );
+  assert.deepEqual(extractReferencedTables('SELECT * FROM "public"."Orders"'), ["orders"]);
+});
+
+test("extractReferencedTables does not see a keyword inside a longer identifier", () => {
+  assert.deepEqual(
+    extractReferencedTables("SELECT r.first_reservation_from_guest FROM reservations r"),
+    ["reservations"]
+  );
+});
+
+test("extractReferencedTables skips catalog and system objects", () => {
+  assert.deepEqual(extractReferencedTables("SELECT * FROM `proj.ds.__TABLES__`"), []);
+  assert.deepEqual(extractReferencedTables("SELECT * FROM information_schema.columns"), []);
+  assert.deepEqual(extractReferencedTables("SELECT * FROM pg_catalog.pg_class"), []);
+});
+
+test("extractReferencedTables treats non-breaking space as whitespace", () => {
+  assert.deepEqual(
+    extractReferencedTables("WITH messages AS (  SELECT 1 ) SELECT * FROM dbt.stg_messages m"),
+    ["stg_messages"]
+  );
+});
+
+test("extractCteNames survives an apostrophe inside a double-quoted string", () => {
+  const sql = `WITH a AS (SELECT "Coeur d'Alene, ID" AS city), periods AS (SELECT 1) SELECT * FROM periods`;
+  assert.deepEqual(extractCteNames(sql), new Set(["a", "periods"]));
+  assert.deepEqual(extractReferencedTables(sql), []);
+});
+
 // ─── extractJoinPairs ────────────────────────────────────
 
 test("extractJoinPairs pairs every JOIN target with the FROM table", () => {
