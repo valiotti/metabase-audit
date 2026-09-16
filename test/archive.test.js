@@ -163,6 +163,17 @@ test("archiveCards rejects a non-numeric id with a clear error", async () => {
   await assert.rejects(archiveCards(makeStubClient(), { ids: ["abc"] }), /Invalid card id/);
 });
 
+test("archiveCards rejects ids that only look numeric to Number()", async () => {
+  // "1e3" would silently become card 1000 and "0x10" card 16. Neither is an id
+  // anybody typed on purpose.
+  await assert.rejects(archiveCards(makeStubClient(), { ids: ["1e3"] }), /Invalid card id: "1e3"/);
+  await assert.rejects(archiveCards(makeStubClient(), { ids: ["0x10"] }), /Invalid card id: "0x10"/);
+  await assert.rejects(archiveCards(makeStubClient(), { ids: [" 12.0 "] }), /Invalid card id/);
+  // plain digits, with or without surrounding space, still work
+  const result = await archiveCards(makeStubClient(), { ids: [" 12 "] });
+  assert.deepEqual(result.plan.map((row) => row.id), [12]);
+});
+
 test("archiveCards rejects empty ids with 'Nothing to archive'", async () => {
   await assert.rejects(archiveCards(makeStubClient(), { ids: [] }), /Nothing to archive/);
 });

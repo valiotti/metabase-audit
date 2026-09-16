@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { main, parseArgs } from "../src/cli.js";
+import { resolveConfig } from "../src/config.js";
+import { runScan } from "../src/scan.js";
 
 const execFileAsync = promisify(execFile);
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -414,4 +416,164 @@ test("the mcp command is imported lazily so the CLI runs without the server", as
   // and nothing in that branch may touch stdout: the protocol owns it
   const branch = source.slice(source.indexOf("async function cmdMcp"), source.indexOf("// --- shared helpers"));
   assert.doesNotMatch(branch, /\bout\(/);
+});
+
+// --- credentials in the URL ---------------------------------------------
+
+/** A Metabase with one database, one table and one question. Enough for a full scan. */
+function stubClient() {
+  return {
+    async getInstanceInfo() {
+      return { siteName: "Acme", version: "v0.62.3" };
+    },
+    async getDatabases() {
+      return [{ id: 2, name: "Warehouse", engine: "postgres" }];
+    },
+    async getDatabaseMetadata() {
+      return {
+        tables: [
+          {
+            id: 10,
+            name: "orders",
+            schema: "public",
+            display_name: "Orders",
+            rows: 120,
+            fields: [{ id: 100, name: "id", base_type: "type/Integer", semantic_type: "type/PK" }],
+          },
+        ],
+      };
+    },
+    async getAllCards() {
+      return [
+        {
+          id: 1,
+          name: "Revenue by month",
+          query_type: "native",
+          database_id: 2,
+          dataset_query: { type: "native", database: 2, native: { query: "SELECT 1 FROM orders" } },
+          collection_id: null,
+          creator_id: null,
+          last_used_at: "2026-09-11T08:00:00Z",
+          view_count: 4,
+          archived: false,
+        },
+      ];
+    },
+    async getCollections() {
+      return [];
+    },
+    async getAllUsers() {
+      return [];
+    },
+    async getAllDashboards() {
+      return [];
+    },
+    async getDashboard() {
+      return null;
+    },
+    async getActivity() {
+      return [];
+    },
+    async compileToNative() {
+      return null;
+    },
+  };
+}
+
+test("credentials in the URL are kept out of the config URL and out of every output", async () => {
+  const config = resolveConfig({ url: "https://admin:hunter2@mb.example.com/" }, {}, root);
+  assert.equal(config.url, "https://mb.example.com");
+  assert.equal(config.basicAuth.username, "admin");
+  assert.equal(config.basicAuth.password, "hunter2");
+
+  const dir = tmp();
+  const result = await runScan({
+    client: stubClient(),
+    url: config.url,
+    dir,
+    out: dir,
+    now: new Date(NOW),
+  });
+
+  assert.equal(result.snapshot.instance.url, "https://mb.example.com");
+  assert.ok(!JSON.stringify(result.snapshot).includes("hunter2"), "the snapshot carries the password");
+  for (const file of ["METALENS-REPORT.md", "DATA-CONTEXT.md", "findings.json"]) {
+    const body = fs.readFileSync(path.join(dir, file), "utf8");
+    assert.ok(!body.includes("hunter2"), `${file} carries the password`);
+    assert.ok(!body.includes("admin:"), `${file} carries the user info`);
+  }
+});
+
+test("a URL without credentials keeps basicAuth null and only drops the trailing slash", () => {
+  const config = resolveConfig({ url: "mb.example.com/metabase/" }, {}, root);
+  assert.equal(config.url, "https://mb.example.com/metabase");
+  assert.equal(config.basicAuth, null);
+});
+
+/** Stands in for a Metabase behind a proxy that quotes the API key back in an error body. */
+async function echoingServer(key) {
+  const server = http.createServer((req, res) => {
+    const url = String(req.url);
+    res.setHeader("content-type", "application/json");
+    if (url.startsWith("/api/session/properties")) {
+      res.statusCode = 401;
+      res.end(JSON.stringify({ error: `rejected key ${req.headers["x-api-key"] ?? key}` }));
+      return;
+    }
+    if (url.startsWith("/api/database/")) {
+      res.end(JSON.stringify({ tables: [{ id: 10, name: "orders", schema: "public", rows: 10, fields: [] }] }));
+      return;
+    }
+    if (url.startsWith("/api/database")) {
+      res.end(JSON.stringify([{ id: 2, name: "Warehouse", engine: "postgres" }]));
+      return;
+    }
+    if (url.startsWith("/api/card")) {
+      res.end(
+        JSON.stringify([
+          {
+            id: 1,
+            name: "Revenue by month",
+            query_type: "native",
+            database_id: 2,
+            dataset_query: { type: "native", database: 2, native: { query: "SELECT 1 FROM orders" } },
+            creator_id: null,
+            last_used_at: "2026-09-11T08:00:00Z",
+            view_count: 4,
+            archived: false,
+          },
+        ]),
+      );
+      return;
+    }
+    res.end("[]");
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  return {
+    url: `http://127.0.0.1:${server.address().port}`,
+    close: () => new Promise((resolve) => server.close(resolve)),
+  };
+}
+
+test("the API key never reaches a stream or a file, not even when Metabase quotes it back", async () => {
+  const KEY = "mb_supersecret_key_value";
+  const dir = tmp();
+  const metabase = await echoingServer(KEY);
+  try {
+    const r = await cli(["scan", "--url", metabase.url, "--key", KEY, "--dir", dir, "--out", dir, "--now", NOW], { env: {} });
+    assert.equal(r.code, 0, r.stderr);
+    assert.ok(!(r.stdout + r.stderr).includes(KEY), "the key reached a stream");
+
+    const snapshot = JSON.parse(fs.readFileSync(path.join(dir, "snapshot.json"), "utf8"));
+    assert.ok(
+      snapshot.meta.warnings.some((w) => w.includes("Could not read instance info")),
+      "the failing call should have been recorded as a warning",
+    );
+    for (const file of fs.readdirSync(dir)) {
+      const body = fs.readFileSync(path.join(dir, file), "utf8");
+      assert.ok(!body.includes(KEY), `${file} carries the key`);
+    }
+  } finally {
+    await metabase.close();
+  }
 });

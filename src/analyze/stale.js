@@ -18,7 +18,9 @@ export function detectStale(snapshot, ctx) {
   for (const card of ctx.activeCards) {
     if (!card.lastUsedAt) continue;
     const days = daysSince(card.lastUsedAt, ctx.now);
-    if (days === null || days <= STALE_DAYS) continue;
+    // A timestamp Metabase wrote in a format we cannot parse is unknown usage,
+    // the same as no timestamp at all. Never call it stale.
+    if (!Number.isFinite(days) || days <= STALE_DAYS) continue;
     if (days > VERY_STALE_DAYS) staleCards180++;
     stale.push({
       id: card.id,

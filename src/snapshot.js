@@ -25,6 +25,8 @@ const ACTIVITY_LIMIT = 2000;
 const ACTIVITY_NULL_RATIO = 0.5;
 /** At most this many creator ids are resolved one by one after the user list. */
 const EXTRA_USER_CAP = 100;
+/** Compile failures listed one by one before the rest become a single line. */
+const COMPILE_WARNING_CAP = 20;
 
 function message(err) {
   return err instanceof Error ? err.message : String(err);
@@ -217,7 +219,14 @@ export async function buildSnapshot(client, options = {}) {
 
   // ─── databases ─────────────────────────────────────────────────────────
   progress("databases", 0, 0);
-  const rawDatabases = (await client.getDatabases()) || [];
+  let rawDatabases = [];
+  let databasesError = null;
+  try {
+    rawDatabases = (await client.getDatabases()) || [];
+  } catch (err) {
+    databasesError = message(err);
+    warnings.push(`Could not fetch databases: ${databasesError}`);
+  }
   const databases = rawDatabases.map((d) => ({
     id: numOrNull(d.id),
     name: strOrNull(d.name),
@@ -260,7 +269,14 @@ export async function buildSnapshot(client, options = {}) {
 
   // ─── cards ─────────────────────────────────────────────────────────────
   progress("cards", 0, 0);
-  const rawCards = (await client.getAllCards()) || [];
+  let rawCards = [];
+  let cardsError = null;
+  try {
+    rawCards = (await client.getAllCards()) || [];
+  } catch (err) {
+    cardsError = message(err);
+    warnings.push(`Could not fetch questions: ${cardsError}`);
+  }
   const cards = [];
   // `dataset_query` is needed for `--compile` but is far too big to write into
   // the snapshot, so it stays in memory for the length of the build only.
@@ -296,6 +312,14 @@ export async function buildSnapshot(client, options = {}) {
     if (card.dataset_query) datasetQueryById.set(card.id, card.dataset_query);
   }
   progress("cards", cards.length, rawCards.length);
+
+  // Nothing at all on both lists, with a failure behind at least one of them,
+  // is a broken connection rather than an empty Metabase. Reporting an A grade
+  // on zero content would be worse than stopping here.
+  if (databases.length === 0 && cards.length === 0 && (databasesError || cardsError)) {
+    const reason = [databasesError, cardsError].filter(Boolean).join("; ");
+    throw new Error(`Could not read databases or questions from Metabase: ${reason}`);
+  }
 
   // ─── collections ───────────────────────────────────────────────────────
   progress("collections", 0, 0);
@@ -476,6 +500,7 @@ export async function buildSnapshot(client, options = {}) {
       (c) => c.queryType === "query" && c.sql === null && !c.archived && datasetQueryById.has(c.id),
     );
     let compileDone = 0;
+    let compileFailures = 0;
     progress("compile", 0, targets.length);
     await mapWithConcurrency(targets, concurrency, async (card) => {
       let native = null;
@@ -489,10 +514,18 @@ export async function buildSnapshot(client, options = {}) {
         card.sqlSource = "compiled";
         meta.compiledCards++;
       } else {
-        warnings.push(`Could not compile card ${card.id} (${card.name})`);
+        // One line per card is useful for a handful of failures and noise for
+        // a thousand, so the rest are counted into a single summary warning.
+        compileFailures++;
+        if (compileFailures <= COMPILE_WARNING_CAP) {
+          warnings.push(`Could not compile card ${card.id} (${card.name})`);
+        }
       }
       progress("compile", ++compileDone, targets.length);
     });
+    if (compileFailures > COMPILE_WARNING_CAP) {
+      warnings.push(`${compileFailures - COMPILE_WARNING_CAP} more questions could not be compiled`);
+    }
   }
 
   return {

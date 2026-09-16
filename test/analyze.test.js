@@ -219,3 +219,15 @@ test("analyze survives an empty snapshot", () => {
   assert.equal(empty.actions.length, 0);
   assert.ok(!JSON.stringify(empty).includes("undefined"));
 });
+
+test("a lastUsedAt nobody can parse counts as unknown, never as stale", () => {
+  const patched = {
+    ...snapshot,
+    cards: snapshot.cards.map((c) => (c.id === 1 ? { ...c, lastUsedAt: "not a date" } : c)),
+  };
+  const out = analyze(patched, { now: NOW });
+
+  assert.equal(byId(out.stale, 1), undefined, "an unparseable timestamp is not staleness");
+  assert.ok(out.stale.every((c) => Number.isFinite(c.daysSinceUse)), "no stale row carries a NaN age");
+  assert.equal(out.summary.staleCards90, findings.summary.staleCards90, "the stale count is unchanged");
+});

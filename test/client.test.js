@@ -194,3 +194,85 @@ test("compileToNative returns null when the server answers 400", async () => {
   assert.equal(result, null);
   assert.equal(fetchImpl.calls.length, 1);
 });
+
+test("sends a basic auth header when the URL carried credentials, and keeps them out of the URL", async () => {
+  const fetchImpl = fakeFetch([jsonResponse(200, [])]);
+  const client = new MetabaseClient({
+    url: "https://mb.example.com",
+    apiKey: "k",
+    basicAuth: { username: "admin", password: "hunter2" },
+    fetchImpl,
+  });
+
+  await client.getDatabases();
+
+  const { url, init } = fetchImpl.calls[0];
+  assert.equal(init.headers.authorization, `Basic ${Buffer.from("admin:hunter2").toString("base64")}`);
+  assert.equal(url, "https://mb.example.com/api/database");
+  assert.ok(!url.includes("hunter2"), "credentials must never travel in the URL");
+});
+
+test("sends no authorization header without basic auth", async () => {
+  const fetchImpl = fakeFetch([jsonResponse(200, [])]);
+  const client = new MetabaseClient({ url: "https://mb.example.com", apiKey: "k", fetchImpl });
+
+  await client.getDatabases();
+
+  assert.equal(fetchImpl.calls[0].init.headers.authorization, undefined);
+});
+
+test("drains the body of a response it is about to retry", async () => {
+  let drained = 0;
+  const retryable = {
+    ok: false,
+    status: 503,
+    statusText: "503",
+    text: async () => {
+      drained++;
+      return "upstream is busy";
+    },
+  };
+  const fetchImpl = fakeFetch([retryable, jsonResponse(200, [{ id: 1 }])]);
+  const client = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl, retryDelayMs: 1 });
+
+  assert.deepEqual(await client.getDatabases(), [{ id: 1 }]);
+  assert.equal(drained, 1, "the retried response was left undrained");
+});
+
+test("a body that cannot be read does not break the retry", async () => {
+  const broken = {
+    ok: false,
+    status: 500,
+    statusText: "500",
+    text: async () => {
+      throw new Error("stream already consumed");
+    },
+  };
+  const fetchImpl = fakeFetch([broken, jsonResponse(200, [{ id: 2 }])]);
+  const client = new MetabaseClient({ url: "http://x.test", apiKey: "k", fetchImpl, retryDelayMs: 1 });
+
+  assert.deepEqual(await client.getDatabases(), [{ id: 2 }]);
+});
+
+test("error bodies never carry the API key or basic-auth password", async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, init });
+    return new Response("proxy says: key=mb_secret_key_123 pw=hunter2", { status: 400 });
+  };
+  const client = new MetabaseClient({
+    url: "https://mb.example.com",
+    apiKey: "mb_secret_key_123",
+    basicAuth: { username: "admin", password: "hunter2" },
+    fetchImpl,
+    retries: 1,
+    retryDelayMs: 1,
+  });
+  await assert.rejects(client.getDatabases(), (err) => {
+    assert.equal(err.status, 400);
+    assert.ok(!err.body.includes("mb_secret_key_123"));
+    assert.ok(!err.body.includes("hunter2"));
+    assert.ok(!err.message.includes("mb_secret_key_123"));
+    return true;
+  });
+});

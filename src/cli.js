@@ -164,7 +164,7 @@ export async function main(argv, { env = process.env, cwd = process.cwd(), stdou
         return 2;
     }
   } catch (error) {
-    fail(redact(error && error.message ? error.message : String(error), config.apiKey));
+    fail(redact(error && error.message ? error.message : String(error), config));
     return 1;
   }
 }
@@ -310,7 +310,7 @@ async function cmdArchive(ctx) {
   }
   if (result.failed.length > 0) {
     out(`Failed ${result.failed.length}:`);
-    for (const item of result.failed) out(`  ${item.id}  ${redact(item.error, config.apiKey)}`);
+    for (const item of result.failed) out(`  ${item.id}  ${redact(item.error, config)}`);
   }
   out(`Undo: npx metabase-audit unarchive --undo ${result.undoFile} --apply`);
   return result.failed.length > 0 ? 1 : 0;
@@ -347,7 +347,7 @@ async function cmdUnarchive({ config, flags, cwd, out, fail }) {
   for (const card of result.restored) out(`  ${card.id}  ${card.name ?? ""}`.trimEnd());
   if (result.failed.length > 0) {
     out(`Failed ${result.failed.length}:`);
-    for (const item of result.failed) out(`  ${item.id}  ${redact(item.error, config.apiKey)}`);
+    for (const item of result.failed) out(`  ${item.id}  ${redact(item.error, config)}`);
   }
   return result.failed.length > 0 ? 1 : 0;
 }
@@ -380,7 +380,7 @@ async function readFindings({ config, now }) {
 }
 
 function client(config) {
-  return new MetabaseClient({ url: config.url, apiKey: config.apiKey });
+  return new MetabaseClient({ url: config.url, apiKey: config.apiKey, basicAuth: config.basicAuth ?? null });
 }
 
 function progressWriter(flags, fail) {
@@ -451,6 +451,8 @@ function usage() {
     `  --url <u>           Metabase URL, or the METABASE_URL environment variable`,
     `  --key <k>           API key, or METABASE_API_KEY`,
     `  --snapshot <file>   Analyse a saved snapshot instead of fetching, no network`,
+    `                      findings and archive re-analyse it and write snapshot.json`,
+    `                      and findings.json into --dir`,
     ``,
     `Output`,
     `  --dir <d>           Where snapshot.json and findings.json go (default ./.metalens)`,
@@ -471,6 +473,9 @@ function usage() {
     `  --reason <text>     Recorded in the undo file`,
     `  --undo <file>       Undo file to reverse, for unarchive`,
     ``,
+    `Testing`,
+    `  --now <iso>         Treat this timestamp as now, for reproducible output`,
+    ``,
     `Examples`,
     `  metabase-audit doctor`,
     `  metabase-audit scan --out ./docs`,
@@ -489,11 +494,22 @@ function parseNow(value) {
   return date;
 }
 
-/** The key must never reach a terminal or a log, not even inside an error. */
-function redact(message, apiKey) {
-  const text = String(message ?? "");
-  if (!apiKey) return text;
-  return text.split(String(apiKey)).join(maskSecret(apiKey));
+/**
+ * The key must never reach a terminal or a log, not even inside an error, and
+ * neither must a password that came in through the URL.
+ */
+function redact(message, config) {
+  let text = String(message ?? "");
+  // The key keeps its first four characters, which is enough to tell two keys
+  // apart in a support thread. A password keeps nothing.
+  for (const [secret, mask] of [
+    [config?.apiKey, maskSecret(config?.apiKey)],
+    [config?.basicAuth?.password, "****"],
+  ]) {
+    if (!secret) continue;
+    text = text.split(String(secret)).join(mask);
+  }
+  return text;
 }
 
 function json(value) {

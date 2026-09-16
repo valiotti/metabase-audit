@@ -8,7 +8,7 @@
  */
 
 import assert from "node:assert/strict";
-import { access, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -263,4 +263,37 @@ test("metabase_unarchive explains a missing undo file", async () => {
   });
   assert.equal(result.isError, true);
   assert.match(textOf(result), /Undo file not found/);
+});
+
+test("the API key is masked in structuredContent, not only in the text", async () => {
+  const KEY = "mb_supersecret_key_value";
+  // A working directory that carries the key is the plainest way to get it into
+  // a payload a client reads instead of the text block.
+  const keyedDir = path.join(workDir, KEY);
+  await mkdir(keyedDir, { recursive: true });
+
+  const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
+  const server = createServer(
+    resolveConfig(
+      {},
+      { METALENS_DIR: keyedDir, METALENS_SNAPSHOT: snapshotFixture, METABASE_API_KEY: KEY },
+      repoRoot
+    )
+  );
+  await server.connect(serverSide);
+
+  const inProcess = new Client({ name: "metabase-audit-test-masking", version: "0.0.0" });
+  await inProcess.connect(clientSide);
+  try {
+    const result = await inProcess.callTool({ name: "metabase_scan", arguments: {} });
+    assert.notEqual(result.isError, true, textOf(result));
+
+    const structured = JSON.stringify(result.structuredContent);
+    assert.ok(structured.includes("mb_s************"), "the masked form should be there instead");
+    assert.ok(!structured.includes(KEY), "the raw key reached structuredContent");
+    assert.ok(!textOf(result).includes(KEY), "the raw key reached the text block");
+  } finally {
+    await inProcess.close().catch(() => {});
+    await server.close().catch(() => {});
+  }
 });

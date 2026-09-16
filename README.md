@@ -57,7 +57,7 @@ Then duplicates (with the question to keep and why), broken questions, stale que
 
 Nothing, except the calls to your own Metabase over the URL you provided. No telemetry, no phone-home, no MetaLens account. The source is small enough to read in one sitting: `src/client.js` is the only file that talks to the network.
 
-The API key is read from the environment or the `--key` flag and is never written to disk, never printed, and masked in error messages.
+The API key is read from the environment or the `--key` flag and is never written to disk, never printed, and masked in error messages. A key passed as `--key` still lands in your shell history and in the process list on a shared machine, so prefer the `METABASE_API_KEY` environment variable. `.metalens/snapshot.json` holds user names and email addresses read from Metabase, so add `.metalens/` to your `.gitignore` before you commit anything next to it.
 
 ## Permissions
 

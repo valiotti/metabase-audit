@@ -21,13 +21,16 @@ export const FINDINGS_FILENAME = "findings.json";
  * @param {string} cwd
  */
 export function resolveConfig(flags = {}, env = process.env, cwd = process.cwd()) {
-  const url = normalizeUrl(flags.url ?? env[ENV_URL] ?? "");
+  const rawUrl = flags.url ?? env[ENV_URL] ?? "";
+  const url = normalizeUrl(rawUrl);
+  const basicAuth = extractBasicAuth(rawUrl);
   const apiKey = String(flags.key ?? env[ENV_KEY] ?? "");
   const dir = path.resolve(cwd, String(flags.dir ?? env[ENV_DIR] ?? ".metalens"));
   const out = path.resolve(cwd, String(flags.out ?? "."));
   const snapshotFile = flags.snapshot ?? env[ENV_SNAPSHOT] ?? null;
   return {
     url,
+    basicAuth,
     apiKey,
     dir,
     out,
@@ -37,12 +40,61 @@ export function resolveConfig(flags = {}, env = process.env, cwd = process.cwd()
   };
 }
 
-/** Adds https:// when the scheme is missing and strips trailing slashes. */
-export function normalizeUrl(value) {
-  let u = String(value ?? "").trim();
+/** Adds the scheme when it is missing, so `new URL()` has something to parse. */
+function withScheme(value) {
+  const u = String(value ?? "").trim();
   if (!u) return "";
-  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
-  return u.replace(/\/+$/, "");
+  return /^https?:\/\//i.test(u) ? u : `https://${u}`;
+}
+
+/**
+ * Adds https:// when the scheme is missing, drops any `user:password@` in front
+ * of the host, and strips the query, the fragment and trailing slashes. The
+ * result is what goes into the snapshot and every printed link, so credentials
+ * a person pasted into the URL never reach a file. `resolveConfig` keeps them
+ * separately in `basicAuth`.
+ */
+export function normalizeUrl(value) {
+  const u = withScheme(value);
+  if (!u) return "";
+  let parsed;
+  try {
+    parsed = new URL(u);
+  } catch {
+    return u.replace(/\/+$/, "");
+  }
+  parsed.username = "";
+  parsed.password = "";
+  return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, "");
+}
+
+/**
+ * `{ username, password }` when the URL carries basic-auth credentials, null
+ * otherwise. Some self-hosted instances sit behind a basic-auth proxy, so the
+ * client still sends them, it just never writes them down.
+ */
+export function extractBasicAuth(value) {
+  const u = withScheme(value);
+  if (!u) return null;
+  let parsed;
+  try {
+    parsed = new URL(u);
+  } catch {
+    return null;
+  }
+  if (!parsed.username && !parsed.password) return null;
+  return {
+    username: safeDecode(parsed.username),
+    password: safeDecode(parsed.password),
+  };
+}
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 /** Message shown when a command needs Metabase and nothing is configured. */

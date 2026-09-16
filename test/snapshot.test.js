@@ -902,3 +902,94 @@ test("loadSnapshotFile reads the checked-in fixture", async () => {
   assert.equal(snapshot.schemaVersion, 1);
   assert.ok(snapshot.cards.length > 0);
 });
+
+test("a failing question list is a warning, not a crash", async () => {
+  const snapshot = await build({
+    async getAllCards() {
+      throw new Error("boom");
+    },
+  });
+
+  assert.equal(snapshot.cards.length, 0);
+  assert.ok(snapshot.databases.length > 0, "the databases still came back");
+  assert.ok(
+    snapshot.meta.warnings.some((w) => w.includes("Could not fetch questions: boom")),
+    snapshot.meta.warnings.join(" | "),
+  );
+});
+
+test("a failing database list is a warning while the questions still come back", async () => {
+  const snapshot = await build({
+    async getDatabases() {
+      throw new Error("no permission");
+    },
+  });
+
+  assert.equal(snapshot.databases.length, 0);
+  assert.ok(snapshot.cards.length > 0);
+  assert.ok(
+    snapshot.meta.warnings.some((w) => w.includes("Could not fetch databases: no permission")),
+    snapshot.meta.warnings.join(" | "),
+  );
+});
+
+test("both lists failing stops the scan instead of reporting an empty instance", async () => {
+  await assert.rejects(
+    () =>
+      build({
+        async getDatabases() {
+          throw new Error("db down");
+        },
+        async getAllCards() {
+          throw new Error("cards down");
+        },
+      }),
+    /Could not read databases or questions from Metabase: db down; cards down/,
+  );
+});
+
+test("a genuinely empty instance is not an error", async () => {
+  const snapshot = await build({
+    async getDatabases() {
+      return [];
+    },
+    async getAllCards() {
+      return [];
+    },
+  });
+
+  assert.deepEqual(snapshot.databases, []);
+  assert.deepEqual(snapshot.cards, []);
+  assert.equal(snapshot.meta.warnings.length, 0);
+});
+
+test("compile warnings are capped at 20 with a summary line for the rest", async () => {
+  const guiCards = Array.from({ length: 25 }, (_, i) => ({
+    id: 100 + i,
+    name: `GUI card ${i}`,
+    query_type: "query",
+    database_id: 2,
+    dataset_query: { type: "query", database: 2, query: { "source-table": 10 } },
+    collection_id: 5,
+    creator_id: 3,
+    last_used_at: "2026-09-11T08:00:00Z",
+    view_count: 1,
+    archived: false,
+  }));
+  const snapshot = await build(
+    {
+      async getAllCards() {
+        return guiCards;
+      },
+      async compileToNative() {
+        return null;
+      },
+    },
+    { compile: true },
+  );
+
+  const perCard = snapshot.meta.warnings.filter((w) => w.startsWith("Could not compile card "));
+  assert.equal(perCard.length, 20, "one line per failure, up to the cap");
+  assert.ok(snapshot.meta.warnings.includes("5 more questions could not be compiled"));
+  assert.equal(snapshot.meta.compiledCards, 0);
+});

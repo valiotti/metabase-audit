@@ -20,6 +20,7 @@ import { STALE_DAYS } from "./analyze/constants.js";
 /** Display caps. Everything past them lives in `.metalens/findings.json`. */
 const MAX_ACTIONS = 5;
 const MAX_ACTION_CARD_IDS = 5;
+const MAX_DUPLICATE_GROUPS = 40;
 const MAX_TABLES = 15;
 const MAX_TABLE_SUGGESTIONS = 10;
 const FINDINGS_HINT = "see .metalens/findings.json";
@@ -34,12 +35,24 @@ function plural(count, one, many) {
   return `${fmtInt(n)} ${n === 1 ? one : many ?? `${one}s`}`;
 }
 
+/**
+ * Markdown that would otherwise be active: a backslash, the brackets that open
+ * a link and the backtick that opens a code span. A question named
+ * "Revenue [click me](https://evil.example.com)" has to read as that text, not
+ * render as a link someone else chose.
+ */
+function escapeMarkdown(text) {
+  return text.replace(/\\/g, "\\\\").replace(/[[\]`]/g, "\\$&");
+}
+
 /** Table-cell safe text: single line, pipes escaped, never "undefined". */
 function cell(value) {
-  return String(value ?? "")
-    // Question names are user data; dashes in them become hyphens so the
-    // report never carries an em or en dash.
-    .replace(/[\u2010-\u2015\u2212]/g, "-")
+  return escapeMarkdown(
+    String(value ?? "")
+      // Question names are user data; dashes in them become hyphens so the
+      // report never carries an em or en dash.
+      .replace(/[\u2010-\u2015\u2212]/g, "-"),
+  )
     .replace(/\s*\r?\n\s*/g, " ")
     .replace(/\|/g, "\\|")
     .trim();
@@ -177,8 +190,11 @@ function duplicatesSection(findings) {
 
   if (groups.length === 0) return `${heading}\n\nNo duplicate questions found.`;
 
+  // The heading keeps counting every group; the body stops where a person
+  // stops reading, and the rest stay one file away.
+  const shown = groups.slice(0, MAX_DUPLICATE_GROUPS);
   const blocks = [heading];
-  for (const group of groups) {
+  for (const group of shown) {
     const keep = group.keep ?? {};
     const others = asArray(group.archive);
     const lines = group.kind === "exact-sql"
@@ -202,6 +218,8 @@ function duplicatesSection(findings) {
       }
     }
   }
+  const rest = groups.length - shown.length;
+  if (rest > 0) blocks.push(`and ${fmtInt(rest)} more groups, ${FINDINGS_HINT}`);
   return blocks.join("\n\n");
 }
 

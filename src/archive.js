@@ -172,7 +172,9 @@ function normalizeIds(ids) {
   const result = [];
   for (const raw of list) {
     const isNumber = typeof raw === "number";
-    const isNumericString = typeof raw === "string" && raw.trim() !== "" && !Number.isNaN(Number(raw));
+    // Only plain digits: "1e3" and "0x10" are numbers to `Number()` and card
+    // ids to nobody, so they are rejected instead of quietly becoming 1000.
+    const isNumericString = typeof raw === "string" && /^\d+$/.test(raw.trim());
     if (!isNumber && !isNumericString) {
       throw new Error(`Invalid card id: ${JSON.stringify(raw)} (must be a number or a numeric string)`);
     }

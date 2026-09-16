@@ -275,3 +275,40 @@ test("renderContext is the only export", async () => {
   const mod = await import("../src/context.js");
   assert.deepEqual(Object.keys(mod).sort(), ["renderContext"]);
 });
+
+test("table usage survives a database name the renderer rewrites", () => {
+  const patched = {
+    ...snapshot,
+    databases: snapshot.databases.map((d) => (d.id === 2 ? { ...d, name: "Prod – EU" } : d)),
+  };
+  const patchedFindings = analyze(patched, { now: NOW });
+  const out = renderContext(patched, patchedFindings, { now: NOW });
+
+  assert.match(out, /### Database: Prod - EU \(postgres\)/, "the en dash is rendered as a hyphen");
+  assert.ok(!out.includes("–"), "no en dash survives into the document");
+  assert.match(out, /#### public\.payments \(1 question, ~98,000 rows\)/, "usage is still found for the table");
+  assert.match(out, /#### public\.orders \(5 questions, ~120,000 rows\)/);
+});
+
+test("Markdown in a question name is escaped, SQL blocks stay verbatim", () => {
+  const hostile = {
+    ...snapshot,
+    cards: snapshot.cards.map((c) =>
+      c.id === 1
+        ? {
+            ...c,
+            name: "Revenue [click me](https://evil.example.com) `x`",
+            description: "See [the doc](https://evil.example.com)",
+            sql: "SELECT `amount` FROM orders",
+          }
+        : c,
+    ),
+  };
+  const hostileFindings = analyze(hostile, { now: NOW });
+  const out = renderContext(hostile, hostileFindings, { now: NOW });
+
+  assert.ok(out.includes("### Revenue \\[click me\\](https://evil.example.com) \\`x\\`"), "brackets are escaped");
+  assert.ok(out.includes("See \\[the doc\\]"), "descriptions are escaped too");
+  assert.doesNotMatch(out, /[^\\]\]\(https:\/\/evil\.example\.com\)/, "no live link to the injected URL");
+  assert.ok(out.includes("```sql\nSELECT `amount` FROM orders\n```"), "SQL is copied verbatim, backticks and all");
+});

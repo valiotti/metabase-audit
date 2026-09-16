@@ -310,3 +310,51 @@ test("factor cells read as sentences, never as double periods", () => {
   );
   assert.ok(!rendered.includes(".."), "no double periods");
 });
+
+test("Markdown in a question name is escaped, never rendered as a link", () => {
+  const hostile = emptyFindings();
+  hostile.instance = { url: "https://metabase.acme.test", siteName: "Acme", version: "v0.62.3" };
+  hostile.stale = [
+    {
+      id: 7,
+      name: "Revenue [click me](https://evil.example.com) `x`",
+      url: "https://metabase.acme.test/question/7",
+      lastUsedAt: "2026-01-01T00:00:00Z",
+      daysSinceUse: 258,
+      viewCount: 1,
+      creatorName: "Bob Ray",
+      collectionPath: "Finance",
+    },
+  ];
+  hostile.broken = [
+    {
+      id: 8,
+      name: "Orders",
+      url: "https://metabase.acme.test/question/8",
+      reason: "References missing table: [legacy](https://evil.example.com)",
+      collectionPath: "Finance / [x](https://evil.example.com)",
+    },
+  ];
+  const rendered = renderReport(hostile, { now: NOW });
+
+  assert.ok(rendered.includes("Revenue \\[click me\\](https://evil.example.com) \\`x\\`"), "brackets are escaped");
+  assert.doesNotMatch(rendered, /[^\\]\]\(https:\/\/evil\.example\.com\)/, "no live link to the injected URL");
+  assert.ok(rendered.includes("missing table: \\[legacy\\]"), "reasons are escaped too");
+  assert.ok(rendered.includes("Finance / \\[x\\]"), "collection paths are escaped too");
+});
+
+test("the duplicates section stops at 40 groups and points at findings.json", () => {
+  const many = emptyFindings();
+  many.instance = { url: "https://metabase.acme.test", siteName: "Acme", version: "v0.62.3" };
+  many.duplicates = Array.from({ length: 45 }, (_, i) => ({
+    kind: "exact-sql",
+    keep: { id: i * 2 + 1, name: `Keep ${i}`, url: null, viewCount: 10, lastUsedAt: null },
+    archive: [{ id: i * 2 + 2, name: `Copy ${i}`, url: null, viewCount: 1, lastUsedAt: null }],
+  }));
+  const rendered = renderReport(many, { now: NOW });
+
+  assert.ok(rendered.includes("## Duplicates (45 groups, 45 questions to archive)"), "the heading counts them all");
+  assert.ok(rendered.includes("**Keep Keep 39 (10 views, last used never)**"), "the fortieth group is rendered");
+  assert.ok(!rendered.includes("Keep 40"), "the forty-first group is not");
+  assert.ok(rendered.includes("and 5 more groups, see .metalens/findings.json"));
+});

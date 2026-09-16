@@ -22,9 +22,13 @@ export function daysSince(date, now) {
   return daysBetween(now, date);
 }
 
-/** en-US thousands formatting for report output. */
+/**
+ * en-US thousands formatting for report output. Anything that is not a finite
+ * number reads as "n/a": Infinity, a date string, an object. A report that says
+ * "Infinity rows" is a bug report waiting to happen.
+ */
 export function fmtInt(n) {
-  if (n === null || n === undefined || Number.isNaN(n)) return "n/a";
+  if (n === null || n === undefined || !Number.isFinite(Number(n))) return "n/a";
   return Number(n).toLocaleString("en-US");
 }
 

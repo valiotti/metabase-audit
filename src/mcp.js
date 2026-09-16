@@ -308,22 +308,44 @@ export async function startMcpServer({ env = process.env, cwd = process.cwd(), w
 function wrap(config, handler) {
   return async (args) => {
     try {
-      return maskInText(await handler(args ?? {}), config.apiKey);
+      return maskInText(await handler(args ?? {}), config);
     } catch (error) {
       const message = error && error.message ? String(error.message) : String(error);
-      return errorResult(redact(message, config.apiKey));
+      return errorResult(redact(message, config));
     }
   };
 }
 
-function maskInText(result, apiKey) {
-  if (!apiKey || !Array.isArray(result.content)) return result;
-  return {
-    ...result,
-    content: result.content.map((block) =>
-      block && block.type === "text" ? { ...block, text: redact(block.text, apiKey) } : block
-    ),
-  };
+/**
+ * Masks the secrets in everything a tool returns. `structuredContent` is walked
+ * as deeply as `content`: a client reads it instead of the text, so a path or a
+ * message that quotes the key back would otherwise leave unmasked.
+ */
+function maskInText(result, config) {
+  if (!result || typeof result !== "object") return result;
+  if (!config?.apiKey && !config?.basicAuth?.password) return result;
+  const masked = { ...result };
+  if (Array.isArray(result.content)) {
+    masked.content = result.content.map((block) =>
+      block && block.type === "text" ? { ...block, text: redact(block.text, config) } : block
+    );
+  }
+  if (result.structuredContent !== undefined) {
+    masked.structuredContent = redactDeep(result.structuredContent, config);
+  }
+  return masked;
+}
+
+/** Same masking, applied to every string inside a JSON-shaped value. */
+function redactDeep(value, config) {
+  if (typeof value === "string") return redact(value, config);
+  if (Array.isArray(value)) return value.map((item) => redactDeep(item, config));
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const [key, item] of Object.entries(value)) out[key] = redactDeep(item, config);
+    return out;
+  }
+  return value;
 }
 
 function okResult(text, structuredContent) {
@@ -464,14 +486,20 @@ async function readFindings(config) {
 }
 
 function buildClient(config) {
-  return new MetabaseClient({ url: config.url, apiKey: config.apiKey });
+  return new MetabaseClient({ url: config.url, apiKey: config.apiKey, basicAuth: config.basicAuth ?? null });
 }
 
-/** Replaces the key with its masked form anywhere it shows up in a message. */
-function redact(message, apiKey) {
-  const text = String(message ?? "");
-  if (!apiKey) return text;
-  return text.split(String(apiKey)).join(maskSecret(apiKey));
+/** Replaces the secrets with their masked form anywhere they show up in a message. */
+function redact(message, config) {
+  let text = String(message ?? "");
+  for (const [secret, mask] of [
+    [config?.apiKey, maskSecret(config?.apiKey)],
+    [config?.basicAuth?.password, "****"],
+  ]) {
+    if (!secret) continue;
+    text = text.split(String(secret)).join(mask);
+  }
+  return text;
 }
 
 /** Joins lines, keeping blank separators inside but trimming them off the ends. */

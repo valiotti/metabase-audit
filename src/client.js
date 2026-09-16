@@ -1,10 +1,11 @@
 /**
  * Metabase REST API client.
  *
- * Talks to a single Metabase instance over `x-api-key` auth. No runtime
+ * Talks to a single Metabase instance over `x-api-key` auth, plus a basic-auth
+ * header when the instance sits behind a proxy that asks for one. No runtime
  * dependencies: uses the built-in `fetch` and `AbortController` (Node >= 18).
  *
- * Ported from the MetaLens SaaS (`metabase-client.ts`) — endpoints, fallback
+ * Ported from the MetaLens SaaS (`metabase-client.ts`): endpoints, fallback
  * behaviour (dashboard search fallback, activity 404, user 403) and the
  * retry/backoff policy are kept faithful to that source.
  */
@@ -53,6 +54,15 @@ async function safeText(res) {
 }
 
 /** Parses the response body as JSON; a 2xx with an empty or non-JSON body resolves to null. */
+/** `Basic base64(user:password)`, or null when there are no credentials. */
+function basicAuthHeader(basicAuth) {
+  if (!basicAuth) return null;
+  const username = String(basicAuth.username ?? "");
+  const password = String(basicAuth.password ?? "");
+  if (!username && !password) return null;
+  return `Basic ${Buffer.from(`${username}:${password}`, "utf8").toString("base64")}`;
+}
+
 async function safeJson(res) {
   const text = await safeText(res);
   if (!text) return null;
@@ -67,6 +77,7 @@ export class MetabaseClient {
   constructor({
     url,
     apiKey,
+    basicAuth = null,
     fetchImpl = globalThis.fetch,
     timeoutMs = 30_000,
     retries = 3,
@@ -75,6 +86,9 @@ export class MetabaseClient {
   }) {
     this.baseUrl = String(url ?? "").replace(/\/+$/, "");
     this.apiKey = apiKey;
+    // Kept as a ready-made header so the credentials are encoded once and are
+    // never part of the URL, which is what gets printed and written to disk.
+    this.basicAuthHeader = basicAuthHeader(basicAuth);
     this.fetchImpl = fetchImpl;
     this.timeoutMs = timeoutMs;
     this.retries = Math.max(1, retries);
@@ -102,6 +116,18 @@ export class MetabaseClient {
    * Retries on network errors, timeouts and 429/5xx, with exponential backoff + jitter.
    * Never retries other 4xx statuses.
    */
+  /**
+   * A proxy or a misconfigured instance can echo request headers back in an
+   * error body. Those bodies end up in warnings and undo files, so the secrets
+   * this client holds are blanked before anything leaves it.
+   */
+  redactSecrets(text) {
+    let out = String(text ?? "");
+    if (this.apiKey) out = out.split(this.apiKey).join("****");
+    if (this.basicAuth && this.basicAuth.password) out = out.split(this.basicAuth.password).join("****");
+    return out;
+  }
+
   async request(method, path, body) {
     const url = `${this.baseUrl}${path}`;
     const maxAttempts = this.retries;
@@ -111,15 +137,13 @@ export class MetabaseClient {
       const timer = setTimeout(() => controller.abort(), this.timeoutMs);
       let res;
       try {
-        const init = {
-          method,
-          headers: {
-            "x-api-key": this.apiKey,
-            "content-type": "application/json",
-            "user-agent": `metabase-audit/${VERSION}`,
-          },
-          signal: controller.signal,
+        const headers = {
+          "x-api-key": this.apiKey,
+          "content-type": "application/json",
+          "user-agent": `metabase-audit/${VERSION}`,
         };
+        if (this.basicAuthHeader) headers.authorization = this.basicAuthHeader;
+        const init = { method, headers, signal: controller.signal };
         if (body !== undefined) init.body = JSON.stringify(body);
         res = await this.fetchImpl(url, init);
       } catch (error) {
@@ -140,6 +164,9 @@ export class MetabaseClient {
       if (!res.ok) {
         if (RETRYABLE_STATUSES.has(res.status) && attempt < maxAttempts) {
           this._log(`Metabase ${res.status} on ${method} ${path} (attempt ${attempt}/${maxAttempts}, retrying)`);
+          // Read the body we are about to discard: an undrained response keeps
+          // the socket busy, and the next attempt then waits on it.
+          await res.text().catch(() => {});
           await this._backoff(attempt);
           continue;
         }
@@ -148,7 +175,7 @@ export class MetabaseClient {
           `Metabase ${res.status} on ${method} ${path}`,
           res.status,
           path,
-          text.slice(0, 300)
+          this.redactSecrets(text.slice(0, 300))
         );
       }
 
@@ -179,7 +206,7 @@ export class MetabaseClient {
     return this.request("GET", `/api/database/${dbId}/metadata?include_hidden=true`);
   }
 
-  /** GET /api/table — flat list across all databases; used as a fallback when the metadata endpoint fails. */
+  /** GET /api/table, a flat list across all databases; used as a fallback when the metadata endpoint fails. */
   async getAllTables() {
     const result = await this.request("GET", "/api/table");
     return unwrapList(result);
@@ -191,7 +218,7 @@ export class MetabaseClient {
     return unwrapList(result);
   }
 
-  /** GET /api/card/:id — null on any error (missing, no permission, etc). */
+  /** GET /api/card/:id, null on any error (missing, no permission, etc). */
   async getCard(id) {
     try {
       return await this.request("GET", `/api/card/${id}`);
@@ -206,7 +233,7 @@ export class MetabaseClient {
     return unwrapList(result);
   }
 
-  /** GET /api/user — [] on 402/403/404 (non-admin key, or feature disabled), instead of throwing. */
+  /** GET /api/user, [] on 402/403/404 (non-admin key, or feature disabled), instead of throwing. */
   async getAllUsers() {
     try {
       const result = await this.request("GET", "/api/user?include_deactivated=true");
@@ -220,7 +247,7 @@ export class MetabaseClient {
   }
 
   /**
-   * GET /api/user/:id — null on 402/403/404 instead of throwing.
+   * GET /api/user/:id, null on 402/403/404 instead of throwing.
    *
    * The list endpoint hides the synthetic users Metabase creates behind API
    * keys, yet questions made with an API key carry that user's id as
@@ -276,7 +303,7 @@ export class MetabaseClient {
     return result;
   }
 
-  /** GET /api/activity?limit=… — [] on 404 (endpoint removed in newer Metabase). */
+  /** GET /api/activity?limit=..., [] on 404 (endpoint removed in newer Metabase). */
   async getActivity(limit = 2000) {
     try {
       const result = await this.request("GET", `/api/activity?limit=${limit}`);
@@ -290,7 +317,7 @@ export class MetabaseClient {
   }
 
   /**
-   * POST /api/dataset/native — compiles a structured (MBQL) dataset_query to native SQL.
+   * POST /api/dataset/native compiles a structured (MBQL) dataset_query to native SQL.
    * Returns null on any error (broken query, permissions, ...) rather than throwing;
    * the underlying request still retries on network errors and 429/5xx.
    */
@@ -303,7 +330,7 @@ export class MetabaseClient {
     }
   }
 
-  /** PUT /api/card/:id — used by archive/unarchive to flip `archived`. */
+  /** PUT /api/card/:id, used by archive/unarchive to flip `archived`. */
   async updateCard(id, patch) {
     return this.request("PUT", `/api/card/${id}`, patch);
   }

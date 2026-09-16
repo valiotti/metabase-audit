@@ -17,6 +17,7 @@
     "src",
     "skills",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "keywords": [
@@ -31,7 +32,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/valiotti/metalens"
+    "url": "https://github.com/valiotti/metabase-audit"
+  },
+  "homepage": "https://github.com/valiotti/metabase-audit",
+  "bugs": {
+    "url": "https://github.com/valiotti/metabase-audit/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

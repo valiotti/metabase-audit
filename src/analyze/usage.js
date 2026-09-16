@@ -157,6 +157,8 @@ export function analyzeUsage(snapshot, ctx) {
       return {
         name: table.name ?? null,
         schema: table.schema ?? null,
+        // The id is what other renderers join on; the name is for reading only.
+        dbId: table.dbId ?? null,
         database: database?.name || "Unknown",
         engine,
         usageCount,

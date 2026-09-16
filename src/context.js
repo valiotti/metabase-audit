@@ -54,9 +54,9 @@ const BUSINESS_TERMS = new Set([
   "inventory", "shipment", "traffic", "attribution", "campaign", "spend", "budget", "forecast",
 ]);
 
-/** Lookup key for a table: database plus schema plus name, with no delimiter to guess. */
-function usageKey(database, schema, name) {
-  return JSON.stringify([String(database ?? ""), String(schema ?? ""), String(name ?? "")]);
+/** Lookup key for a table: database id plus schema plus name, with no delimiter to guess. */
+function usageKey(dbId, schema, name) {
+  return JSON.stringify([String(dbId ?? ""), String(schema ?? ""), String(name ?? "")]);
 }
 
 function asArray(value) {
@@ -73,15 +73,31 @@ function clean(value) {
   return String(value).replace(/[\u2010-\u2015\u2212]/g, "-").trim();
 }
 
+/**
+ * Markdown that would otherwise be active: a backslash, the brackets that open
+ * a link and the backtick that opens a code span. Names and descriptions come
+ * from Metabase, so a question named "Revenue [click me](https://evil.example.com)"
+ * has to read as that text instead of rendering as a link someone else chose.
+ * SQL blocks and URLs do not go through here.
+ */
+function escapeMarkdown(value) {
+  return String(value).replace(/\\/g, "\\\\").replace(/[[\]`]/g, "\\$&");
+}
+
+/** Free text on its way into prose or a heading: cleaned, then Markdown-escaped. */
+function text(value) {
+  return escapeMarkdown(clean(value));
+}
+
 /** Same, plus what a Markdown table cell cannot contain. */
 function cell(value) {
-  return clean(value).replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+  return text(value).replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
 }
 
 /** Metabase prefixes every type with `type/`. Nobody needs to read that. */
 function shortType(value) {
-  const text = clean(value);
-  return text ? text.replace(/^type\//, "") : "";
+  const cleaned = text(value);
+  return cleaned ? cleaned.replace(/^type\//, "") : "";
 }
 
 /** `YYYY-MM-DD`, or null when the value is not a date. */
@@ -128,11 +144,12 @@ function buildIndex(snapshot, findings) {
   }
 
   // Usage comes from the analyzer, which counts GUI source tables and parses
-  // native SQL. Matching on database plus schema plus name keeps two tables of
-  // the same name on different schemas apart.
+  // native SQL. Matching on database id plus schema plus name keeps two tables
+  // of the same name on different schemas apart, and keeps the lookup out of
+  // reach of anything that rewrites a database name for display.
   const usageByTable = new Map();
   for (const t of asArray(findings.tables)) {
-    usageByTable.set(usageKey(t.database, t.schema, t.name), num(t.usageCount));
+    usageByTable.set(usageKey(t.dbId, t.schema, t.name), num(t.usageCount));
   }
 
   const usersKnown = asArray(snapshot.users).filter((u) => u.id !== SAMPLE_USER_ID).length;
@@ -144,7 +161,7 @@ function buildIndex(snapshot, findings) {
 
   const collectionPaths = new Map();
   for (const c of asArray(snapshot.collections)) {
-    collectionPaths.set(c.id, clean(c.path || c.name));
+    collectionPaths.set(c.id, text(c.path || c.name));
   }
 
   // Cards a duplicate group proposes to archive are not "trusted": they are the
@@ -163,16 +180,16 @@ function buildIndex(snapshot, findings) {
     usersKnown,
     collectionPaths,
     duplicateArchiveIds,
-    usageFor(dbName, tbl) {
-      return usageByTable.get(usageKey(dbName, tbl.schema, tbl.name)) ?? 0;
+    usageFor(dbId, tbl) {
+      return usageByTable.get(usageKey(dbId, tbl.schema, tbl.name)) ?? 0;
     },
   };
 }
 
 function renderHeader(snapshot, findings, now) {
-  const siteName = clean(findings.instance?.siteName ?? snapshot.instance?.siteName) || "this Metabase";
+  const siteName = text(findings.instance?.siteName ?? snapshot.instance?.siteName) || "this Metabase";
   const url = clean(findings.instance?.url ?? snapshot.instance?.url) || "not recorded";
-  const version = clean(findings.instance?.version ?? snapshot.instance?.version) || "unknown";
+  const version = text(findings.instance?.version ?? snapshot.instance?.version) || "unknown";
   return [
     `# Data context: ${siteName}`,
     "",
@@ -185,7 +202,7 @@ function renderHeader(snapshot, findings, now) {
 
 function renderOverview(findings, index) {
   const s = findings.summary || {};
-  const engines = [...new Set(index.databases.map((d) => clean(d.engine)).filter(Boolean))].sort();
+  const engines = [...new Set(index.databases.map((d) => text(d.engine)).filter(Boolean))].sort();
   return [
     "## Instance overview",
     "",
@@ -194,24 +211,24 @@ function renderOverview(findings, index) {
     `- Active questions: ${fmtInt(num(s.activeCards))}`,
     `- Dashboards: ${fmtInt(num(s.totalDashboards))}`,
     `- Users known: ${fmtInt(index.usersKnown)}`,
-    `- Health: ${clean(s.healthGrade) || "n/a"} (${fmtInt(num(s.healthScore))} of 100)`,
+    `- Health: ${text(s.healthGrade) || "n/a"} (${fmtInt(num(s.healthScore))} of 100)`,
     `- Engines in use: ${engines.length > 0 ? engines.join(", ") : "not detected"}`,
   ];
 }
 
 /** `public.orders` when the table carries a schema, `orders` when it does not. */
 function qualifiedName(tbl) {
-  const schema = clean(tbl.schema);
-  const name = clean(tbl.name);
+  const schema = text(tbl.schema);
+  const name = text(tbl.name);
   return schema ? `${schema}.${name}` : name;
 }
 
 function renderColumn(field, index) {
-  const parts = [`- ${clean(field.name)}: ${shortType(field.baseType) || "unknown"}`];
+  const parts = [`- ${text(field.name)}: ${shortType(field.baseType) || "unknown"}`];
   const semantic = shortType(field.semanticType);
   if (semantic) parts.push(` [${semantic}]`);
   const target = field.fkTargetFieldId != null ? index.fieldIndex.get(field.fkTargetFieldId) : null;
-  if (target && target.table.id !== field.tableId) parts.push(` -> ${clean(target.table.name)}`);
+  if (target && target.table.id !== field.tableId) parts.push(` -> ${text(target.table.name)}`);
   return parts.join("");
 }
 
@@ -223,11 +240,11 @@ function renderDataModel(index, { maxTablesPerDb, maxColumns }) {
   }
 
   for (const database of index.databases) {
-    const dbName = clean(database.name) || `Database ${database.id}`;
-    const engine = clean(database.engine) || "unknown engine";
+    const dbName = text(database.name) || `Database ${database.id}`;
+    const engine = text(database.engine) || "unknown engine";
     const dbTables = index.tables
       .filter((t) => t.dbId === database.id)
-      .map((t) => ({ table: t, usage: index.usageFor(dbName, t) }))
+      .map((t) => ({ table: t, usage: index.usageFor(database.id, t) }))
       // Queried tables first: that is the core model, and it is what a reader
       // with a limited context window should spend its tokens on.
       .sort((a, b) => b.usage - a.usage || String(a.table.name).localeCompare(String(b.table.name)));
@@ -242,7 +259,7 @@ function renderDataModel(index, { maxTablesPerDb, maxColumns }) {
     for (const { table: tbl, usage } of shown) {
       const rows = num(tbl.rowCount) > 0 ? `~${fmtInt(tbl.rowCount)} rows` : "rows unknown";
       lines.push("", `#### ${qualifiedName(tbl)} (${plural(usage, "question", "questions")}, ${rows})`);
-      const description = clean(tbl.description);
+      const description = text(tbl.description);
       if (description) lines.push(description, "");
 
       const fields = asArray(tbl.fields);
@@ -272,7 +289,7 @@ function renderRelationships(findings, index) {
       const target = index.fieldIndex.get(field.fkTargetFieldId);
       if (!target || target.table.id === tbl.id) continue;
       declared.push(
-        `- ${clean(tbl.name)}.${clean(field.name)} -> ${clean(target.table.name)}.${clean(target.field.name)}`,
+        `- ${text(tbl.name)}.${text(field.name)} -> ${text(target.table.name)}.${text(target.field.name)}`,
       );
     }
   }
@@ -293,7 +310,7 @@ function renderRelationships(findings, index) {
     lines.push("", "Inferred from JOINs in saved questions:", "");
     for (const edge of edges) {
       lines.push(
-        `- ${clean(edge.from)} <-> ${clean(edge.to)} (${plural(num(edge.count), "question", "questions")}, inferred)`,
+        `- ${text(edge.from)} <-> ${text(edge.to)} (${plural(num(edge.count), "question", "questions")}, inferred)`,
       );
     }
   }
@@ -356,7 +373,7 @@ function renderKeyFindings(findings) {
   return [
     "## Key findings",
     "",
-    `- Health grade ${clean(s.healthGrade) || "n/a"}, score ${fmtInt(num(s.healthScore))} of 100.`,
+    `- Health grade ${text(s.healthGrade) || "n/a"}, score ${fmtInt(num(s.healthScore))} of 100.`,
     `- ${plural(num(s.duplicateGroups), "duplicate group", "duplicate groups")}, ${plural(num(s.duplicateCardsToArchive), "question", "questions")} proposed for archiving.`,
     `- ${plural(num(s.brokenCards), "question references", "questions reference")} a table or a column that is not in the schema.`,
     `- ${plural(num(s.staleCards90), "question", "questions")} unused for 90 days, ${fmtInt(num(s.staleCards180))} of them for 180 days.`,
@@ -408,11 +425,11 @@ function renderTrustedQueries(index, topQueries) {
 
   for (const card of candidates) {
     const source = card.sqlSource === "native" ? "native SQL" : "compiled from the query builder";
-    lines.push("", `### ${clean(card.name) || `Question ${num(card.id)}`}`, "");
+    lines.push("", `### ${text(card.name) || `Question ${num(card.id)}`}`, "");
     lines.push(
       `Views: ${fmtInt(num(card.viewCount))}. Last used: ${ymd(card.lastUsedAt) ?? "never"}. Collection: ${collectionOf(card, index)}. Source: ${source}.`,
     );
-    const description = clean(card.description);
+    const description = text(card.description);
     if (description) lines.push("", description);
     lines.push("", ...renderSql(card.sql));
   }
