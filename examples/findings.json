@@ -1,0 +1,1932 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-16T09:00:00.000Z",
+  "instance": {
+    "url": "https://metabase.northwind-outdoors.example",
+    "siteName": "Northwind Outdoors",
+    "version": "v0.55.8"
+  },
+  "summary": {
+    "totalCards": 142,
+    "activeCards": 138,
+    "archivedCards": 4,
+    "totalDashboards": 11,
+    "totalDatabases": 1,
+    "totalTables": 28,
+    "coreTables": 22,
+    "duplicateGroups": 12,
+    "duplicateCardsToArchive": 11,
+    "brokenCards": 4,
+    "staleCards90": 57,
+    "staleCards180": 27,
+    "anomalies": 4,
+    "healthScore": 36,
+    "healthGrade": "C"
+  },
+  "health": {
+    "score": 36,
+    "grade": "C",
+    "verdict": "Foundation needs rework.",
+    "factors": [
+      {
+        "name": "Content freshness",
+        "score": 14,
+        "maxScore": 35,
+        "description": "58 of 138 questions are stale or unused (42%)",
+        "howToImprove": "Archive questions not accessed in 90+ days. Start with collections nobody owns."
+      },
+      {
+        "name": "No duplicates",
+        "score": 7,
+        "maxScore": 25,
+        "description": "12 duplicate groups found",
+        "howToImprove": "Consolidate duplicate queries, keep one canonical version per metric."
+      },
+      {
+        "name": "Documentation & organization",
+        "score": 4,
+        "maxScore": 20,
+        "description": "4 organizational issues detected",
+        "howToImprove": "Add descriptions to top-used questions. Move orphan queries into collections."
+      },
+      {
+        "name": "Dashboard reliability",
+        "score": 11,
+        "maxScore": 20,
+        "description": "2 of 11 dashboards have broken cards, 4 are mostly stale",
+        "howToImprove": "Fix or remove broken cards from active dashboards. That is what stakeholders see."
+      }
+    ]
+  },
+  "duplicates": [
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 328,
+        "name": "New subscribers by plan (weekly)",
+        "url": "https://metabase.northwind-outdoors.example/question/328",
+        "viewCount": 860,
+        "lastUsedAt": "2026-08-22T08:52:33.000Z"
+      },
+      "archive": [
+        {
+          "id": 368,
+          "name": "new_subscribers_by_plan_v2",
+          "url": "https://metabase.northwind-outdoors.example/question/368",
+          "viewCount": 1,
+          "lastUsedAt": "2025-12-24T15:49:47.000Z"
+        },
+        {
+          "id": 374,
+          "name": "New subscribers by plan (copy)",
+          "url": "https://metabase.northwind-outdoors.example/question/374",
+          "viewCount": 16,
+          "lastUsedAt": "2026-04-15T13:24:19.000Z"
+        },
+        {
+          "id": 406,
+          "name": "Copy of New subscribers by plan",
+          "url": "https://metabase.northwind-outdoors.example/question/406",
+          "viewCount": 8,
+          "lastUsedAt": null
+        }
+      ],
+      "recommendation": "These 4 queries are structurally identical. Keep New subscribers by plan (weekly), archive the other 3."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 316,
+        "name": "Net revenue by day, last 90 days",
+        "url": "https://metabase.northwind-outdoors.example/question/316",
+        "viewCount": 2380,
+        "lastUsedAt": "2026-08-30T18:11:12.000Z"
+      },
+      "archive": [
+        {
+          "id": 366,
+          "name": "Net revenue by day (copy)",
+          "url": "https://metabase.northwind-outdoors.example/question/366",
+          "viewCount": 41,
+          "lastUsedAt": "2026-07-09T13:00:13.000Z"
+        },
+        {
+          "id": 399,
+          "name": "Daily revenue for standup",
+          "url": "https://metabase.northwind-outdoors.example/question/399",
+          "viewCount": 3,
+          "lastUsedAt": "2026-05-20T09:42:03.000Z"
+        }
+      ],
+      "recommendation": "These 3 queries are structurally identical. Keep Net revenue by day, last 90 days, archive the other 2."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 338,
+        "name": "Top products by units sold, last 90 days",
+        "url": "https://metabase.northwind-outdoors.example/question/338",
+        "viewCount": 240,
+        "lastUsedAt": "2026-07-20T10:40:37.000Z"
+      },
+      "archive": [
+        {
+          "id": 369,
+          "name": "Top SKUs for merchandising",
+          "url": "https://metabase.northwind-outdoors.example/question/369",
+          "viewCount": 10,
+          "lastUsedAt": "2025-07-24T07:52:53.000Z"
+        },
+        {
+          "id": 387,
+          "name": "Best sellers, last 30 days",
+          "url": "https://metabase.northwind-outdoors.example/question/387",
+          "viewCount": 29,
+          "lastUsedAt": "2026-06-10T10:51:12.000Z"
+        }
+      ],
+      "recommendation": "These 3 queries are structurally identical. Keep Top products by units sold, last 90 days, archive the other 2."
+    },
+    {
+      "kind": "same-name",
+      "similarity": 0.8,
+      "databaseId": 1,
+      "keep": {
+        "id": 415,
+        "name": "Weekly Revenue",
+        "url": "https://metabase.northwind-outdoors.example/question/415",
+        "viewCount": 940,
+        "lastUsedAt": "2026-09-11T09:04:55.000Z"
+      },
+      "archive": [
+        {
+          "id": 311,
+          "name": "Weekly Revenue",
+          "url": "https://metabase.northwind-outdoors.example/question/311",
+          "viewCount": 6,
+          "lastUsedAt": "2025-08-30T18:47:26.000Z"
+        },
+        {
+          "id": 323,
+          "name": "Weekly Revenue",
+          "url": "https://metabase.northwind-outdoors.example/question/323",
+          "viewCount": 33,
+          "lastUsedAt": "2026-04-10T12:14:58.000Z"
+        }
+      ],
+      "recommendation": "3 questions share the name \"Weekly Revenue\". Review whether all of them are still needed, or consolidate into one."
+    },
+    {
+      "kind": "same-name",
+      "similarity": 0.8,
+      "databaseId": 1,
+      "keep": {
+        "id": 438,
+        "name": "MRR",
+        "url": "https://metabase.northwind-outdoors.example/question/438",
+        "viewCount": 1640,
+        "lastUsedAt": "2026-08-25T08:00:54.000Z"
+      },
+      "archive": [
+        {
+          "id": 312,
+          "name": "MRR",
+          "url": "https://metabase.northwind-outdoors.example/question/312",
+          "viewCount": 1,
+          "lastUsedAt": "2025-10-03T13:09:00.000Z"
+        },
+        {
+          "id": 436,
+          "name": "MRR",
+          "url": "https://metabase.northwind-outdoors.example/question/436",
+          "viewCount": 96,
+          "lastUsedAt": "2026-07-18T18:14:41.000Z"
+        }
+      ],
+      "recommendation": "3 questions share the name \"MRR\". Review whether all of them are still needed, or consolidate into one."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 335,
+        "name": "Refund rate by product category, trailing 30d",
+        "url": "https://metabase.northwind-outdoors.example/question/335",
+        "viewCount": 1120,
+        "lastUsedAt": "2026-08-24T15:13:44.000Z"
+      },
+      "archive": [
+        {
+          "id": 370,
+          "name": "Refund rate by category (2025 version)",
+          "url": "https://metabase.northwind-outdoors.example/question/370",
+          "viewCount": 12,
+          "lastUsedAt": "2024-11-29T12:53:33.000Z"
+        }
+      ],
+      "recommendation": "These 2 queries are structurally identical. Keep Refund rate by product category, trailing 30d, archive the other 1."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 339,
+        "name": "Support tickets per 1k orders",
+        "url": "https://metabase.northwind-outdoors.example/question/339",
+        "viewCount": 410,
+        "lastUsedAt": "2026-08-30T07:05:21.000Z"
+      },
+      "archive": [
+        {
+          "id": 401,
+          "name": "Contact rate per 1k orders (Ops)",
+          "url": "https://metabase.northwind-outdoors.example/question/401",
+          "viewCount": 55,
+          "lastUsedAt": "2026-08-04T07:51:59.000Z"
+        }
+      ],
+      "recommendation": "These 2 queries are structurally identical. Keep Support tickets per 1k orders, archive the other 1."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 344,
+        "name": "Ad spend vs new customers by channel",
+        "url": "https://metabase.northwind-outdoors.example/question/344",
+        "viewCount": 190,
+        "lastUsedAt": "2026-05-08T12:04:12.000Z"
+      },
+      "archive": [
+        {
+          "id": 365,
+          "name": "CAC by channel (working copy)",
+          "url": "https://metabase.northwind-outdoors.example/question/365",
+          "viewCount": 10,
+          "lastUsedAt": "2025-10-24T17:28:22.000Z"
+        }
+      ],
+      "recommendation": "These 2 queries are structurally identical. Keep Ad spend vs new customers by channel, archive the other 1."
+    },
+    {
+      "kind": "exact-sql",
+      "similarity": 1,
+      "databaseId": 1,
+      "keep": {
+        "id": 351,
+        "name": "Session to order conversion by device",
+        "url": "https://metabase.northwind-outdoors.example/question/351",
+        "viewCount": 205,
+        "lastUsedAt": "2026-07-27T10:18:28.000Z"
+      },
+      "archive": [
+        {
+          "id": 413,
+          "name": "Device conversion (rebuilt after tracking fix)",
+          "url": "https://metabase.northwind-outdoors.example/question/413",
+          "viewCount": 24,
+          "lastUsedAt": "2026-05-10T12:01:41.000Z"
+        }
+      ],
+      "recommendation": "These 2 queries are structurally identical. Keep Session to order conversion by device, archive the other 1."
+    },
+    {
+      "kind": "same-name",
+      "similarity": 0.8,
+      "databaseId": 1,
+      "keep": {
+        "id": 435,
+        "name": "Orders by channel",
+        "url": "https://metabase.northwind-outdoors.example/question/435",
+        "viewCount": 122,
+        "lastUsedAt": "2026-09-07T11:03:12.000Z"
+      },
+      "archive": [
+        {
+          "id": 322,
+          "name": "Orders by Channel",
+          "url": "https://metabase.northwind-outdoors.example/question/322",
+          "viewCount": 45,
+          "lastUsedAt": "2026-08-14T13:18:14.000Z"
+        }
+      ],
+      "recommendation": "2 questions share the name \"Orders by channel\" but read from different source tables (orders, fct_orders). They may be the same metric from different angles."
+    },
+    {
+      "kind": "same-name",
+      "similarity": 0.8,
+      "databaseId": 1,
+      "keep": {
+        "id": 334,
+        "name": "Churn Rate",
+        "url": "https://metabase.northwind-outdoors.example/question/334",
+        "viewCount": 430,
+        "lastUsedAt": "2026-07-19T15:27:20.000Z"
+      },
+      "archive": [
+        {
+          "id": 391,
+          "name": "Churn rate",
+          "url": "https://metabase.northwind-outdoors.example/question/391",
+          "viewCount": 32,
+          "lastUsedAt": "2026-05-30T10:00:09.000Z"
+        }
+      ],
+      "recommendation": "2 questions share the name \"Churn Rate\". Review whether all of them are still needed, or consolidate into one."
+    },
+    {
+      "kind": "same-name",
+      "similarity": 0.8,
+      "databaseId": 1,
+      "keep": {
+        "id": 388,
+        "name": "Active Subscribers",
+        "url": "https://metabase.northwind-outdoors.example/question/388",
+        "viewCount": 540,
+        "lastUsedAt": "2026-09-09T16:57:50.000Z"
+      },
+      "archive": [
+        {
+          "id": 439,
+          "name": "Active Subscribers",
+          "url": "https://metabase.northwind-outdoors.example/question/439",
+          "viewCount": 25,
+          "lastUsedAt": "2026-07-01T10:20:41.000Z"
+        }
+      ],
+      "recommendation": "2 questions share the name \"Active Subscribers\". Review whether all of them are still needed, or consolidate into one."
+    }
+  ],
+  "broken": [
+    {
+      "id": 349,
+      "name": "Subscriptions imported from the old billing system",
+      "url": "https://metabase.northwind-outdoors.example/question/349",
+      "kind": "missing-table",
+      "reason": "References missing table: legacy_subscriptions",
+      "missingTables": [
+        "legacy_subscriptions"
+      ],
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 361,
+      "name": "Daily net revenue (mart)",
+      "url": "https://metabase.northwind-outdoors.example/question/361",
+      "kind": "missing-table",
+      "reason": "References missing table: fct_revenue",
+      "missingTables": [
+        "fct_revenue"
+      ],
+      "collectionPath": "Board"
+    },
+    {
+      "id": 378,
+      "name": "Revenue by month (2022 close)",
+      "url": "https://metabase.northwind-outdoors.example/question/378",
+      "kind": "missing-table",
+      "reason": "References missing table: orders_2022",
+      "missingTables": [
+        "orders_2022"
+      ],
+      "collectionPath": "Finance / Archive"
+    },
+    {
+      "id": 409,
+      "name": "Support tickets by customer tier",
+      "url": "https://metabase.northwind-outdoors.example/question/409",
+      "kind": "missing-table",
+      "reason": "References missing table: customer_ltv_mart",
+      "missingTables": [
+        "customer_ltv_mart"
+      ],
+      "collectionPath": "Support"
+    }
+  ],
+  "stale": [
+    {
+      "id": 370,
+      "name": "Refund rate by category (2025 version)",
+      "url": "https://metabase.northwind-outdoors.example/question/370",
+      "lastUsedAt": "2024-11-29T12:53:33.000Z",
+      "daysSinceUse": 655,
+      "viewCount": 12,
+      "creatorName": "Nadia Ferraro",
+      "collectionPath": "Finance / Archive"
+    },
+    {
+      "id": 319,
+      "name": "Cohort retention by signup month",
+      "url": "https://metabase.northwind-outdoors.example/question/319",
+      "lastUsedAt": "2025-02-08T07:49:17.000Z",
+      "daysSinceUse": 585,
+      "viewCount": 8,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 310,
+      "name": "Email capture rate by device",
+      "url": "https://metabase.northwind-outdoors.example/question/310",
+      "lastUsedAt": "2025-03-05T08:06:00.000Z",
+      "daysSinceUse": 560,
+      "viewCount": 9,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 327,
+      "name": "CAC payback by cohort month",
+      "url": "https://metabase.northwind-outdoors.example/question/327",
+      "lastUsedAt": "2025-03-27T16:34:24.000Z",
+      "daysSinceUse": 537,
+      "viewCount": 11,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 324,
+      "name": "Repeat purchase rate within 60 days",
+      "url": "https://metabase.northwind-outdoors.example/question/324",
+      "lastUsedAt": "2025-05-09T13:01:31.000Z",
+      "daysSinceUse": 494,
+      "viewCount": 16,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 380,
+      "name": "Customers without an order",
+      "url": "https://metabase.northwind-outdoors.example/question/380",
+      "lastUsedAt": "2025-05-14T07:07:41.000Z",
+      "daysSinceUse": 490,
+      "viewCount": 15,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 309,
+      "name": "Campaign list with budgets",
+      "url": "https://metabase.northwind-outdoors.example/question/309",
+      "lastUsedAt": "2025-05-25T17:30:01.000Z",
+      "daysSinceUse": 478,
+      "viewCount": 3,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 333,
+      "name": "MRR movement (new, expansion, churn)",
+      "url": "https://metabase.northwind-outdoors.example/question/333",
+      "lastUsedAt": "2025-07-04T15:54:57.000Z",
+      "daysSinceUse": 438,
+      "viewCount": 7,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 394,
+      "name": "Churned MRR by plan, last 6 months",
+      "url": "https://metabase.northwind-outdoors.example/question/394",
+      "lastUsedAt": "2025-07-08T15:23:55.000Z",
+      "daysSinceUse": 434,
+      "viewCount": 4,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 369,
+      "name": "Top SKUs for merchandising",
+      "url": "https://metabase.northwind-outdoors.example/question/369",
+      "lastUsedAt": "2025-07-24T07:52:53.000Z",
+      "daysSinceUse": 419,
+      "viewCount": 10,
+      "creatorName": "Nadia Ferraro",
+      "collectionPath": null
+    },
+    {
+      "id": 314,
+      "name": "Orders per customer distribution",
+      "url": "https://metabase.northwind-outdoors.example/question/314",
+      "lastUsedAt": "2025-08-29T19:49:45.000Z",
+      "daysSinceUse": 382,
+      "viewCount": 4,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 311,
+      "name": "Weekly Revenue",
+      "url": "https://metabase.northwind-outdoors.example/question/311",
+      "lastUsedAt": "2025-08-30T18:47:26.000Z",
+      "daysSinceUse": 381,
+      "viewCount": 6,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 364,
+      "name": "Reactivations per month",
+      "url": "https://metabase.northwind-outdoors.example/question/364",
+      "lastUsedAt": "2025-09-23T14:19:08.000Z",
+      "daysSinceUse": 357,
+      "viewCount": 7,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 395,
+      "name": "Ad spend efficiency by platform",
+      "url": "https://metabase.northwind-outdoors.example/question/395",
+      "lastUsedAt": "2025-09-28T07:19:29.000Z",
+      "daysSinceUse": 353,
+      "viewCount": 13,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 312,
+      "name": "MRR",
+      "url": "https://metabase.northwind-outdoors.example/question/312",
+      "lastUsedAt": "2025-10-03T13:09:00.000Z",
+      "daysSinceUse": 347,
+      "viewCount": 1,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 332,
+      "name": "Deferred revenue from annual plans",
+      "url": "https://metabase.northwind-outdoors.example/question/332",
+      "lastUsedAt": "2025-10-15T19:38:36.000Z",
+      "daysSinceUse": 335,
+      "viewCount": 6,
+      "creatorName": "Nadia Ferraro",
+      "collectionPath": "Finance"
+    },
+    {
+      "id": 365,
+      "name": "CAC by channel (working copy)",
+      "url": "https://metabase.northwind-outdoors.example/question/365",
+      "lastUsedAt": "2025-10-24T17:28:22.000Z",
+      "daysSinceUse": 326,
+      "viewCount": 10,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 378,
+      "name": "Revenue by month (2022 close)",
+      "url": "https://metabase.northwind-outdoors.example/question/378",
+      "lastUsedAt": "2025-10-27T18:16:33.000Z",
+      "daysSinceUse": 323,
+      "viewCount": 11,
+      "creatorName": "Rosa Villalobos",
+      "collectionPath": "Finance / Archive"
+    },
+    {
+      "id": 349,
+      "name": "Subscriptions imported from the old billing system",
+      "url": "https://metabase.northwind-outdoors.example/question/349",
+      "lastUsedAt": "2025-12-15T12:14:49.000Z",
+      "daysSinceUse": 274,
+      "viewCount": 16,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 362,
+      "name": "NPS detractor comments, last 30 days",
+      "url": "https://metabase.northwind-outdoors.example/question/362",
+      "lastUsedAt": "2025-12-20T09:50:09.000Z",
+      "daysSinceUse": 269,
+      "viewCount": 11,
+      "creatorName": "Nadia Ferraro",
+      "collectionPath": "Board"
+    },
+    {
+      "id": 368,
+      "name": "new_subscribers_by_plan_v2",
+      "url": "https://metabase.northwind-outdoors.example/question/368",
+      "lastUsedAt": "2025-12-24T15:49:47.000Z",
+      "daysSinceUse": 265,
+      "viewCount": 1,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 302,
+      "name": "Sessions from paid campaigns",
+      "url": "https://metabase.northwind-outdoors.example/question/302",
+      "lastUsedAt": "2025-12-26T15:32:16.000Z",
+      "daysSinceUse": 263,
+      "viewCount": 10,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 303,
+      "name": "Sessions by landing path",
+      "url": "https://metabase.northwind-outdoors.example/question/303",
+      "lastUsedAt": "2026-01-09T14:08:18.000Z",
+      "daysSinceUse": 249,
+      "viewCount": 7,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 405,
+      "name": "Order items for the packaging test",
+      "url": "https://metabase.northwind-outdoors.example/question/405",
+      "lastUsedAt": "2026-02-07T18:31:55.000Z",
+      "daysSinceUse": 220,
+      "viewCount": 8,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Personal / Priya Natarajan"
+    },
+    {
+      "id": 308,
+      "name": "Search to purchase rate",
+      "url": "https://metabase.northwind-outdoors.example/question/308",
+      "lastUsedAt": "2026-03-02T10:12:28.000Z",
+      "daysSinceUse": 197,
+      "viewCount": 16,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 382,
+      "name": "Lifetime value buckets",
+      "url": "https://metabase.northwind-outdoors.example/question/382",
+      "lastUsedAt": "2026-03-03T19:07:25.000Z",
+      "daysSinceUse": 196,
+      "viewCount": 11,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 317,
+      "name": "Campaign performance, last 28 days",
+      "url": "https://metabase.northwind-outdoors.example/question/317",
+      "lastUsedAt": "2026-03-07T10:45:40.000Z",
+      "daysSinceUse": 192,
+      "viewCount": 12,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 355,
+      "name": "Plan mix over time",
+      "url": "https://metabase.northwind-outdoors.example/question/355",
+      "lastUsedAt": "2026-03-28T10:51:37.000Z",
+      "daysSinceUse": 171,
+      "viewCount": 34,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 371,
+      "name": "Customers acquired by source",
+      "url": "https://metabase.northwind-outdoors.example/question/371",
+      "lastUsedAt": "2026-04-04T12:56:05.000Z",
+      "daysSinceUse": 164,
+      "viewCount": 19,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 404,
+      "name": "Event volume by name, last 7 days",
+      "url": "https://metabase.northwind-outdoors.example/question/404",
+      "lastUsedAt": "2026-04-04T16:18:56.000Z",
+      "daysSinceUse": 164,
+      "viewCount": 22,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 323,
+      "name": "Weekly Revenue",
+      "url": "https://metabase.northwind-outdoors.example/question/323",
+      "lastUsedAt": "2026-04-10T12:14:58.000Z",
+      "daysSinceUse": 158,
+      "viewCount": 33,
+      "creatorName": "Henrik Solberg",
+      "collectionPath": "Ops"
+    },
+    {
+      "id": 374,
+      "name": "New subscribers by plan (copy)",
+      "url": "https://metabase.northwind-outdoors.example/question/374",
+      "lastUsedAt": "2026-04-15T13:24:19.000Z",
+      "daysSinceUse": 153,
+      "viewCount": 16,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 381,
+      "name": "Subscription plan mix",
+      "url": "https://metabase.northwind-outdoors.example/question/381",
+      "lastUsedAt": "2026-04-16T10:56:20.000Z",
+      "daysSinceUse": 152,
+      "viewCount": 22,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 396,
+      "name": "First order value by acquisition source",
+      "url": "https://metabase.northwind-outdoors.example/question/396",
+      "lastUsedAt": "2026-04-16T15:59:19.000Z",
+      "daysSinceUse": 152,
+      "viewCount": 3,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth / Experiments"
+    },
+    {
+      "id": 350,
+      "name": "Tax collected by state, quarterly",
+      "url": "https://metabase.northwind-outdoors.example/question/350",
+      "lastUsedAt": "2026-04-18T17:42:27.000Z",
+      "daysSinceUse": 150,
+      "viewCount": 5,
+      "creatorName": "Rosa Villalobos",
+      "collectionPath": "Finance"
+    },
+    {
+      "id": 313,
+      "name": "Subscription events, one customer",
+      "url": "https://metabase.northwind-outdoors.example/question/313",
+      "lastUsedAt": "2026-04-19T14:01:36.000Z",
+      "daysSinceUse": 149,
+      "viewCount": 26,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Personal / Priya Natarajan"
+    },
+    {
+      "id": 361,
+      "name": "Daily net revenue (mart)",
+      "url": "https://metabase.northwind-outdoors.example/question/361",
+      "lastUsedAt": "2026-04-20T07:55:48.000Z",
+      "daysSinceUse": 149,
+      "viewCount": 10,
+      "creatorName": "Grant Ishikawa",
+      "collectionPath": "Board"
+    },
+    {
+      "id": 315,
+      "name": "Reopened tickets share",
+      "url": "https://metabase.northwind-outdoors.example/question/315",
+      "lastUsedAt": "2026-05-06T13:31:05.000Z",
+      "daysSinceUse": 132,
+      "viewCount": 3,
+      "creatorName": "Jamie Okonkwo",
+      "collectionPath": "Support"
+    },
+    {
+      "id": 344,
+      "name": "Ad spend vs new customers by channel",
+      "url": "https://metabase.northwind-outdoors.example/question/344",
+      "lastUsedAt": "2026-05-08T12:04:12.000Z",
+      "daysSinceUse": 130,
+      "viewCount": 190,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 413,
+      "name": "Device conversion (rebuilt after tracking fix)",
+      "url": "https://metabase.northwind-outdoors.example/question/413",
+      "lastUsedAt": "2026-05-10T12:01:41.000Z",
+      "daysSinceUse": 128,
+      "viewCount": 24,
+      "creatorName": "Priya Natarajan",
+      "collectionPath": "Data Team / Scratch"
+    },
+    {
+      "id": 326,
+      "name": "Trial share of new revenue",
+      "url": "https://metabase.northwind-outdoors.example/question/326",
+      "lastUsedAt": "2026-05-13T08:33:46.000Z",
+      "daysSinceUse": 126,
+      "viewCount": 34,
+      "creatorName": "Rosa Villalobos",
+      "collectionPath": "Finance"
+    },
+    {
+      "id": 409,
+      "name": "Support tickets by customer tier",
+      "url": "https://metabase.northwind-outdoors.example/question/409",
+      "lastUsedAt": "2026-05-13T07:28:50.000Z",
+      "daysSinceUse": 126,
+      "viewCount": 18,
+      "creatorName": "Jamie Okonkwo",
+      "collectionPath": "Support"
+    },
+    {
+      "id": 393,
+      "name": "Customers by country and state",
+      "url": "https://metabase.northwind-outdoors.example/question/393",
+      "lastUsedAt": "2026-05-13T11:28:24.000Z",
+      "daysSinceUse": 125,
+      "viewCount": 24,
+      "creatorName": "Grant Ishikawa",
+      "collectionPath": "Board"
+    },
+    {
+      "id": 353,
+      "name": "Products without an inventory record",
+      "url": "https://metabase.northwind-outdoors.example/question/353",
+      "lastUsedAt": "2026-05-17T11:12:58.000Z",
+      "daysSinceUse": 121,
+      "viewCount": 5,
+      "creatorName": "Henrik Solberg",
+      "collectionPath": "Ops"
+    },
+    {
+      "id": 320,
+      "name": "Revenue recognized vs cash collected",
+      "url": "https://metabase.northwind-outdoors.example/question/320",
+      "lastUsedAt": "2026-05-20T13:59:07.000Z",
+      "daysSinceUse": 118,
+      "viewCount": 8,
+      "creatorName": "Grant Ishikawa",
+      "collectionPath": "Finance"
+    },
+    {
+      "id": 399,
+      "name": "Daily revenue for standup",
+      "url": "https://metabase.northwind-outdoors.example/question/399",
+      "lastUsedAt": "2026-05-20T09:42:03.000Z",
+      "daysSinceUse": 118,
+      "viewCount": 3,
+      "creatorName": "Henrik Solberg",
+      "collectionPath": "Ops"
+    },
+    {
+      "id": 340,
+      "name": "Paid vs organic revenue split",
+      "url": "https://metabase.northwind-outdoors.example/question/340",
+      "lastUsedAt": "2026-05-21T14:54:52.000Z",
+      "daysSinceUse": 117,
+      "viewCount": 12,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 402,
+      "name": "Trial starts by week",
+      "url": "https://metabase.northwind-outdoors.example/question/402",
+      "lastUsedAt": "2026-05-21T19:47:26.000Z",
+      "daysSinceUse": 117,
+      "viewCount": 6,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 342,
+      "name": "Orders per day with empty days filled in",
+      "url": "https://metabase.northwind-outdoors.example/question/342",
+      "lastUsedAt": "2026-05-28T12:22:15.000Z",
+      "daysSinceUse": 110,
+      "viewCount": 10,
+      "creatorName": "Henrik Solberg",
+      "collectionPath": null
+    },
+    {
+      "id": 391,
+      "name": "Churn rate",
+      "url": "https://metabase.northwind-outdoors.example/question/391",
+      "lastUsedAt": "2026-05-30T10:00:09.000Z",
+      "daysSinceUse": 108,
+      "viewCount": 32,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 321,
+      "name": "Backordered units by week",
+      "url": "https://metabase.northwind-outdoors.example/question/321",
+      "lastUsedAt": "2026-05-31T15:06:28.000Z",
+      "daysSinceUse": 107,
+      "viewCount": 20,
+      "creatorName": "Henrik Solberg",
+      "collectionPath": "Ops"
+    },
+    {
+      "id": 325,
+      "name": "Ad spend by platform",
+      "url": "https://metabase.northwind-outdoors.example/question/325",
+      "lastUsedAt": "2026-06-02T13:46:03.000Z",
+      "daysSinceUse": 105,
+      "viewCount": 33,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 430,
+      "name": "Refund reasons",
+      "url": "https://metabase.northwind-outdoors.example/question/430",
+      "lastUsedAt": "2026-06-02T10:56:40.000Z",
+      "daysSinceUse": 105,
+      "viewCount": 27,
+      "creatorName": "Jamie Okonkwo",
+      "collectionPath": "Support"
+    },
+    {
+      "id": 400,
+      "name": "Customers with more than five orders",
+      "url": "https://metabase.northwind-outdoors.example/question/400",
+      "lastUsedAt": "2026-06-08T07:52:22.000Z",
+      "daysSinceUse": 100,
+      "viewCount": 23,
+      "creatorName": "Marcus Oyelaran",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 318,
+      "name": "Payment failures by processor",
+      "url": "https://metabase.northwind-outdoors.example/question/318",
+      "lastUsedAt": "2026-06-09T18:03:02.000Z",
+      "daysSinceUse": 98,
+      "viewCount": 33,
+      "creatorName": "Rosa Villalobos",
+      "collectionPath": "Finance"
+    },
+    {
+      "id": 387,
+      "name": "Best sellers, last 30 days",
+      "url": "https://metabase.northwind-outdoors.example/question/387",
+      "lastUsedAt": "2026-06-10T10:51:12.000Z",
+      "daysSinceUse": 97,
+      "viewCount": 29,
+      "creatorName": "Ellis Barbour",
+      "collectionPath": "Growth"
+    },
+    {
+      "id": 352,
+      "name": "Discount leakage by coupon code",
+      "url": "https://metabase.northwind-outdoors.example/question/352",
+      "lastUsedAt": "2026-06-11T12:33:25.000Z",
+      "daysSinceUse": 96,
+      "viewCount": 32,
+      "creatorName": "Rosa Villalobos",
+      "collectionPath": "Finance"
+    }
+  ],
+  "anomalies": [
+    {
+      "type": "unused_table",
+      "severity": "medium",
+      "message": "6 tables have zero query references",
+      "entity": "customers_old, dim_dates, events_legacy, orders_backup_2023, tmp_cohort_export",
+      "count": 6
+    },
+    {
+      "type": "stale_query",
+      "severity": "low",
+      "message": "27 queries haven't been accessed in 180+ days",
+      "entity": "Sessions from paid campaigns, Sessions by landing path, Search to purchase rate, Campaign list with budgets, Email capture rate by device",
+      "count": 27
+    },
+    {
+      "type": "naming",
+      "severity": "medium",
+      "message": "83 of 138 active questions have no description",
+      "entity": "60% undocumented",
+      "count": 83
+    },
+    {
+      "type": "orphan",
+      "severity": "low",
+      "message": "12 questions are not organized in any collection",
+      "entity": "Orders per day with empty days filled in, Weekly digest numbers, Trials expiring in the next seven days, Top SKUs for merchandising, Sessions by device type",
+      "count": 12
+    }
+  ],
+  "tables": [
+    {
+      "name": "orders",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 35,
+      "rowCount": 1284000,
+      "columnCount": 18,
+      "referencedBy": [
+        "fct_orders",
+        "order_items",
+        "payments",
+        "refunds",
+        "shipments",
+        "support_tickets"
+      ],
+      "suggestions": [
+        "Partition by placed_at (range partitioning on placed_at)",
+        "Add composite index on (customer_id, status, channel)",
+        "Large table (1.3M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 18,
+      "rowCount": 96500,
+      "columnCount": 11,
+      "referencedBy": [
+        "fct_subscription_mrr",
+        "int_subscription_periods",
+        "subscription_events"
+      ],
+      "suggestions": [
+        "Add composite index on (customer_id, plan_code, status)"
+      ]
+    },
+    {
+      "name": "customers",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 13,
+      "rowCount": 412000,
+      "columnCount": 12,
+      "referencedBy": [
+        "dim_customers",
+        "events",
+        "fct_orders",
+        "fct_subscription_mrr",
+        "nps_responses",
+        "orders",
+        "orders_backup_2023",
+        "payments",
+        "sessions",
+        "subscription_events",
+        "subscriptions",
+        "support_tickets",
+        "tmp_cohort_export"
+      ],
+      "suggestions": [
+        "Partition by created_at (range partitioning on created_at)",
+        "Add composite index on (signup_source, marketing_opt_in)"
+      ]
+    },
+    {
+      "name": "support_tickets",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 12,
+      "rowCount": 158000,
+      "columnCount": 12,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by opened_at (range partitioning on opened_at)",
+        "Add composite index on (customer_id, order_id, category)"
+      ]
+    },
+    {
+      "name": "fct_orders",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 10,
+      "rowCount": 1284000,
+      "columnCount": 11,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by order_date (range partitioning on order_date)",
+        "Add composite index on (order_id, customer_id, channel)",
+        "Large table (1.3M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "order_items",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 9,
+      "rowCount": 3942000,
+      "columnCount": 8,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by created_at (range partitioning on created_at)",
+        "Large table (3.9M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "products",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 9,
+      "rowCount": 4300,
+      "columnCount": 11,
+      "referencedBy": [
+        "dim_products",
+        "inventory",
+        "order_items"
+      ],
+      "suggestions": []
+    },
+    {
+      "name": "sessions",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 9,
+      "rowCount": 12400000,
+      "columnCount": 11,
+      "referencedBy": [
+        "events"
+      ],
+      "suggestions": [
+        "Partition by started_at (range partitioning on started_at)",
+        "Large table (12.4M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "inventory",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 8,
+      "rowCount": 68400,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "dim_customers",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 7,
+      "rowCount": 412000,
+      "columnCount": 9,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by first_order_date (range partitioning on first_order_date)"
+      ]
+    },
+    {
+      "name": "fct_revenue_daily",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 7,
+      "rowCount": 14600,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "subscription_events",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 7,
+      "rowCount": 1118000,
+      "columnCount": 8,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by occurred_at (range partitioning on occurred_at)",
+        "Large table (1.1M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "ad_spend",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 6,
+      "rowCount": 214000,
+      "columnCount": 9,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by spend_date (range partitioning on spend_date)"
+      ]
+    },
+    {
+      "name": "shipments",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 6,
+      "rowCount": 1190000,
+      "columnCount": 10,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by shipped_at (range partitioning on shipped_at)",
+        "Large table (1.2M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "fct_subscription_mrr",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 5,
+      "rowCount": 1158000,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by month_start (range partitioning on month_start)",
+        "Large table (1.2M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "refunds",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 5,
+      "rowCount": 41800,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "events",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 4,
+      "rowCount": 48000000,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by occurred_at (range partitioning on occurred_at)",
+        "Large table (48.0M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "payments",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 4,
+      "rowCount": 1310000,
+      "columnCount": 11,
+      "referencedBy": [
+        "refunds"
+      ],
+      "suggestions": [
+        "Partition by created_at (range partitioning on created_at)",
+        "Large table (1.3M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "nps_responses",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 3,
+      "rowCount": 24600,
+      "columnCount": 6,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "campaigns",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 2,
+      "rowCount": 1240,
+      "columnCount": 8,
+      "referencedBy": [
+        "ad_spend"
+      ],
+      "suggestions": []
+    },
+    {
+      "name": "dim_products",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 1,
+      "rowCount": 4300,
+      "columnCount": 9,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "int_subscription_periods",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 1,
+      "rowCount": 341000,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by period_start (range partitioning on period_start)"
+      ]
+    },
+    {
+      "name": "customers_old",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 288000,
+      "columnCount": 4,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by created_at (range partitioning on created_at)"
+      ]
+    },
+    {
+      "name": "dim_dates",
+      "schema": "dbt_marts",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 3653,
+      "columnCount": 7,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "events_legacy",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 9600000,
+      "columnCount": 4,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by ts (range partitioning on ts)",
+        "Large table (9.6M rows), ensure proper indexing"
+      ]
+    },
+    {
+      "name": "orders_backup_2023",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 812000,
+      "columnCount": 5,
+      "referencedBy": [],
+      "suggestions": [
+        "Partition by placed_at (range partitioning on placed_at)"
+      ]
+    },
+    {
+      "name": "tmp_cohort_export",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 34900,
+      "columnCount": 4,
+      "referencedBy": [],
+      "suggestions": []
+    },
+    {
+      "name": "zz_test",
+      "schema": "public",
+      "dbId": 1,
+      "database": "Warehouse",
+      "engine": "postgres",
+      "usageCount": 0,
+      "rowCount": 1200,
+      "columnCount": 3,
+      "referencedBy": [],
+      "suggestions": []
+    }
+  ],
+  "dashboards": [
+    {
+      "id": 4401,
+      "name": "Board KPIs",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4401",
+      "cardCount": 8,
+      "brokenCardCount": 0,
+      "staleCardCount": 0,
+      "creatorName": "Dana Whitfield",
+      "lastViewedAt": "2026-09-15T15:08:57.000Z",
+      "viewCount": 2100,
+      "status": "healthy"
+    },
+    {
+      "id": 4402,
+      "name": "Weekly Revenue",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4402",
+      "cardCount": 6,
+      "brokenCardCount": 0,
+      "staleCardCount": 2,
+      "creatorName": "Rosa Villalobos",
+      "lastViewedAt": "2026-09-13T19:10:00.000Z",
+      "viewCount": 640,
+      "status": "healthy"
+    },
+    {
+      "id": 4405,
+      "name": "Ops Daily",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4405",
+      "cardCount": 6,
+      "brokenCardCount": 0,
+      "staleCardCount": 1,
+      "creatorName": "Henrik Solberg",
+      "lastViewedAt": "2026-09-15T17:31:52.000Z",
+      "viewCount": 480,
+      "status": "healthy"
+    },
+    {
+      "id": 4403,
+      "name": "Subscription Health",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4403",
+      "cardCount": 6,
+      "brokenCardCount": 0,
+      "staleCardCount": 5,
+      "creatorName": "Marcus Oyelaran",
+      "lastViewedAt": "2026-06-12T09:05:06.000Z",
+      "viewCount": 310,
+      "status": "warning"
+    },
+    {
+      "id": 4404,
+      "name": "Marketing Attribution",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4404",
+      "cardCount": 5,
+      "brokenCardCount": 0,
+      "staleCardCount": 4,
+      "creatorName": "Ellis Barbour",
+      "lastViewedAt": "2026-04-27T13:11:31.000Z",
+      "viewCount": 220,
+      "status": "warning"
+    },
+    {
+      "id": 4406,
+      "name": "Support Overview",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4406",
+      "cardCount": 5,
+      "brokenCardCount": 1,
+      "staleCardCount": 2,
+      "creatorName": "Jamie Okonkwo",
+      "lastViewedAt": "2026-09-14T19:55:30.000Z",
+      "viewCount": 190,
+      "status": "broken"
+    },
+    {
+      "id": 4410,
+      "name": "Inventory",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4410",
+      "cardCount": 4,
+      "brokenCardCount": 0,
+      "staleCardCount": 0,
+      "creatorName": "Henrik Solberg",
+      "lastViewedAt": "2026-09-12T08:01:53.000Z",
+      "viewCount": 150,
+      "status": "healthy"
+    },
+    {
+      "id": 4411,
+      "name": "Executive Summary (legacy)",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4411",
+      "cardCount": 6,
+      "brokenCardCount": 1,
+      "staleCardCount": 4,
+      "creatorName": "Grant Ishikawa",
+      "lastViewedAt": "2026-07-01T14:06:33.000Z",
+      "viewCount": 130,
+      "status": "broken"
+    },
+    {
+      "id": 4407,
+      "name": "Cohorts 2023",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4407",
+      "cardCount": 4,
+      "brokenCardCount": 0,
+      "staleCardCount": 4,
+      "creatorName": "Priya Natarajan",
+      "lastViewedAt": "2025-12-02T10:28:42.000Z",
+      "viewCount": 95,
+      "status": "warning"
+    },
+    {
+      "id": 4408,
+      "name": "Q3 Planning (old)",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4408",
+      "cardCount": 3,
+      "brokenCardCount": 0,
+      "staleCardCount": 3,
+      "creatorName": "Nadia Ferraro",
+      "lastViewedAt": "2025-10-20T07:53:58.000Z",
+      "viewCount": 60,
+      "status": "warning"
+    },
+    {
+      "id": 4409,
+      "name": "Priya scratch",
+      "url": "https://metabase.northwind-outdoors.example/dashboard/4409",
+      "cardCount": 0,
+      "brokenCardCount": 0,
+      "staleCardCount": 0,
+      "creatorName": "Priya Natarajan",
+      "lastViewedAt": "2026-08-13T16:43:29.000Z",
+      "viewCount": 12,
+      "status": "unknown"
+    }
+  ],
+  "creators": [
+    {
+      "id": 4,
+      "name": "Marcus Oyelaran",
+      "totalCards": 26,
+      "activeCards": 13,
+      "staleCards": 13
+    },
+    {
+      "id": 8,
+      "name": "Henrik Solberg",
+      "totalCards": 24,
+      "activeCards": 19,
+      "staleCards": 5
+    },
+    {
+      "id": 7,
+      "name": "Rosa Villalobos",
+      "totalCards": 20,
+      "activeCards": 15,
+      "staleCards": 5
+    },
+    {
+      "id": 5,
+      "name": "Priya Natarajan",
+      "totalCards": 16,
+      "activeCards": 5,
+      "staleCards": 11
+    },
+    {
+      "id": 6,
+      "name": "Ellis Barbour",
+      "totalCards": 13,
+      "activeCards": 0,
+      "staleCards": 13
+    },
+    {
+      "id": 9,
+      "name": "Jamie Okonkwo",
+      "totalCards": 12,
+      "activeCards": 9,
+      "staleCards": 3
+    },
+    {
+      "id": 10,
+      "name": "Nadia Ferraro",
+      "totalCards": 10,
+      "activeCards": 6,
+      "staleCards": 4
+    },
+    {
+      "id": 3,
+      "name": "Dana Whitfield",
+      "totalCards": 9,
+      "activeCards": 9,
+      "staleCards": 0
+    },
+    {
+      "id": 41,
+      "name": "API key user 41",
+      "totalCards": 4,
+      "activeCards": 4,
+      "staleCards": 0
+    },
+    {
+      "id": 11,
+      "name": "Grant Ishikawa",
+      "totalCards": 3,
+      "activeCards": 0,
+      "staleCards": 3
+    },
+    {
+      "id": 57,
+      "name": "API key user 57",
+      "totalCards": 1,
+      "activeCards": 1,
+      "staleCards": 0
+    }
+  ],
+  "actions": [
+    {
+      "priority": "high",
+      "title": "Fix 4 questions pointing at missing tables",
+      "description": "These questions read tables that no longer exist in the warehouse (legacy_subscriptions, fct_revenue, orders_2022, ...). They fail for everyone who opens them.",
+      "impact": "Broken questions erode trust in the whole instance faster than anything else on this list.",
+      "cardIds": [
+        349,
+        361,
+        378,
+        409
+      ]
+    },
+    {
+      "priority": "high",
+      "title": "Archive 11 exact duplicate queries",
+      "description": "7 groups of structurally identical queries. Keep one from each group and archive the rest.",
+      "impact": "Removes 11 redundant questions, so search returns one answer per metric instead of several.",
+      "cardIds": [
+        368,
+        374,
+        406,
+        366,
+        399,
+        369,
+        387,
+        370,
+        401,
+        365,
+        413
+      ]
+    },
+    {
+      "priority": "medium",
+      "title": "Review 57 stale queries (90+ days unused)",
+      "description": "Nobody has opened these in 90+ days. Archive the ones that are no longer needed.",
+      "impact": "Cleaning up 41% of the question library cuts the noise in search and in collection browsing.",
+      "cardIds": [
+        370,
+        319,
+        310,
+        327,
+        324,
+        380,
+        309,
+        333,
+        394,
+        369,
+        314,
+        311,
+        364,
+        395,
+        312,
+        332,
+        365,
+        378,
+        349,
+        362,
+        368,
+        302,
+        303,
+        405,
+        308,
+        382,
+        317,
+        355,
+        371,
+        404,
+        323,
+        374,
+        381,
+        396,
+        350,
+        313,
+        361,
+        315,
+        344,
+        413,
+        326,
+        409,
+        393,
+        353,
+        320,
+        399,
+        340,
+        402,
+        342,
+        391
+      ]
+    },
+    {
+      "priority": "medium",
+      "title": "Add descriptions to 83 questions",
+      "description": "83 of 138 active questions have no description. Start with the most-viewed ones.",
+      "impact": "A description lets a teammate tell what a question measures without reading its SQL.",
+      "cardIds": [
+        372,
+        360,
+        356,
+        398,
+        429,
+        427,
+        343,
+        420,
+        414,
+        417,
+        407,
+        347,
+        359,
+        441,
+        418,
+        419,
+        401,
+        389,
+        428,
+        322
+      ]
+    },
+    {
+      "priority": "low",
+      "title": "Review 5 groups of questions with the same name",
+      "description": "Same name, different query. They may be old versions, or the same metric measured two ways.",
+      "impact": "Consolidating variants into one source of truth prevents conflicting numbers across dashboards.",
+      "cardIds": [
+        415,
+        311,
+        323,
+        438,
+        312,
+        436,
+        435,
+        322,
+        334,
+        391,
+        388,
+        439
+      ]
+    },
+    {
+      "priority": "low",
+      "title": "Your core data model is 22 tables",
+      "description": "Out of 28 tables, only 22 are read by a saved question. Those are the real business tables.",
+      "impact": "Point documentation, tests and any warehouse migration at these first. The rest are supporting or unused.",
+      "cardIds": []
+    }
+  ],
+  "erdEdges": [
+    {
+      "from": "order_items",
+      "to": "orders",
+      "count": 6
+    },
+    {
+      "from": "order_items",
+      "to": "products",
+      "count": 6
+    },
+    {
+      "from": "customers",
+      "to": "ad_spend",
+      "count": 3
+    },
+    {
+      "from": "inventory",
+      "to": "products",
+      "count": 3
+    },
+    {
+      "from": "customers",
+      "to": "orders",
+      "count": 2
+    },
+    {
+      "from": "sessions",
+      "to": "orders",
+      "count": 2
+    },
+    {
+      "from": "shipments",
+      "to": "orders",
+      "count": 2
+    },
+    {
+      "from": "support_tickets",
+      "to": "orders",
+      "count": 2
+    },
+    {
+      "from": "ad_spend",
+      "to": "campaigns",
+      "count": 1
+    },
+    {
+      "from": "customers",
+      "to": "dim_customers",
+      "count": 1
+    },
+    {
+      "from": "dim_customers",
+      "to": "support_tickets",
+      "count": 1
+    },
+    {
+      "from": "fct_orders",
+      "to": "dim_customers",
+      "count": 1
+    },
+    {
+      "from": "fct_revenue_daily",
+      "to": "fct_orders",
+      "count": 1
+    },
+    {
+      "from": "fct_revenue_daily",
+      "to": "fct_subscription_mrr",
+      "count": 1
+    },
+    {
+      "from": "fct_revenue_daily",
+      "to": "payments",
+      "count": 1
+    },
+    {
+      "from": "int_subscription_periods",
+      "to": "subscriptions",
+      "count": 1
+    },
+    {
+      "from": "order_items",
+      "to": "dim_products",
+      "count": 1
+    },
+    {
+      "from": "order_items",
+      "to": "inventory",
+      "count": 1
+    },
+    {
+      "from": "orders",
+      "to": "fct_orders",
+      "count": 1
+    },
+    {
+      "from": "sessions",
+      "to": "customers",
+      "count": 1
+    },
+    {
+      "from": "sessions",
+      "to": "events",
+      "count": 1
+    },
+    {
+      "from": "subscriptions",
+      "to": "fct_revenue_daily",
+      "count": 1
+    },
+    {
+      "from": "subscriptions",
+      "to": "orders",
+      "count": 1
+    }
+  ],
+  "cardsByType": [
+    {
+      "type": "native",
+      "count": 94
+    },
+    {
+      "type": "query",
+      "count": 44
+    }
+  ],
+  "cardsByDatabase": [
+    {
+      "database": "Warehouse",
+      "count": 138
+    }
+  ]
+}

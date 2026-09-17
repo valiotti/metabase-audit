@@ -4,3 +4,5 @@ tmp/
 METALENS-REPORT.md
 DATA-CONTEXT.md
 .DS_Store
+!examples/METALENS-REPORT.md
+!examples/DATA-CONTEXT.md
