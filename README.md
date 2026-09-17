@@ -6,6 +6,10 @@ It finds duplicate questions, questions that point at tables that no longer exis
 
 It also writes `DATA-CONTEXT.md`: your schema, relationships, the queries the team actually trusts, and a glossary. Paste it into Claude (or any LLM) and it knows your data. Four Claude Code skills and an MCP server are included.
 
+![doctor, scan and a dry-run archive on the sample instance](docs/terminal.png)
+
+Full sample output from a synthetic instance: [examples/METALENS-REPORT.md](examples/METALENS-REPORT.md) and [examples/DATA-CONTEXT.md](examples/DATA-CONTEXT.md).
+
 ## Run it
 
 1. In Metabase, create an API key: Admin settings, Authentication, API Keys, group Administrators. (Why admin: see Permissions below.)
